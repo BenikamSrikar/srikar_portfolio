@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Model Inspector</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js",
+        "three/examples/jsm/loaders/GLTFLoader.js": "https://cdn.jsdelivr.net/npm/three@0.183.0/examples/jsm/loaders/GLTFLoader.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <pre id="output">Loading model...</pre>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    
+    const loader = new GLTFLoader();
+    loader.load('/models/animator.glb', (gltf) => {
+      const lines = [];
+      lines.push(`Animations: ${gltf.animations.length}`);
+      gltf.animations.forEach((a, i) => {
+        lines.push(`  Anim ${i}: "${a.name}" (${a.duration.toFixed(2)}s, ${a.tracks.length} tracks)`);
+        a.tracks.forEach(t => {
+          lines.push(`    Track: ${t.name} (${t.constructor.name})`);
+        });
+      });
+      
+      lines.push('\n--- SCENE TREE ---');
+      function printTree(obj, indent = 0) {
+        const prefix = '  '.repeat(indent);
+        const type = obj.type;
+        const hasGeo = obj.isMesh ? ` [Mesh]` : '';
+        const hasBone = obj.isBone ? ` [Bone]` : '';
+        const pos = obj.position ? ` pos(${obj.position.x.toFixed(2)},${obj.position.y.toFixed(2)},${obj.position.z.toFixed(2)})` : '';
+        const rot = obj.rotation ? ` rot(${obj.rotation.x.toFixed(2)},${obj.rotation.y.toFixed(2)},${obj.rotation.z.toFixed(2)})` : '';
+        lines.push(`${prefix}${obj.name || '(unnamed)'} [${type}]${hasGeo}${hasBone}${pos}${rot}`);
+        obj.children.forEach(c => printTree(c, indent + 1));
+      }
+      printTree(gltf.scene);
+      
+      document.getElementById('output').textContent = lines.join('\n');
+    });
+  </script>
+</body>
+</html>
