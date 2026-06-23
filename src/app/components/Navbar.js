@@ -2,55 +2,33 @@
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 
-export default function Navbar({ showDock, setShowDock }) {
+export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [isScrolling, setIsScrolling] = useState(false);
-    const [shouldHideOnScroll, setShouldHideOnScroll] = useState(false);
+    const [showNavbar, setShowNavbar] = useState(true);
+    const [isMaximized, setIsMaximized] = useState(false);
+    const lastScrollY = useRef(0);
     
     const logoRef = useRef(null);
     const controlsRef = useRef(null);
-    const scrollTimeoutRef = useRef(null);
 
     // 1. SCROLL & ENTRANCE ANIMATIONS
     useEffect(() => {
         const handleScroll = () => {
-            const scrollY = window.scrollY;
-            setIsScrolled(scrollY > 50);
+            const currentScrollY = window.scrollY;
             
-            // Only hide navbar on scroll if dock is visible (showDock = true)
-            // If dock is hidden (showDock = false), navbar stays fixed
-            if (showDock) {
-                // Check if we're past the About section
-                const aboutSection = document.getElementById('about');
-                if (aboutSection) {
-                    const aboutBottom = aboutSection.offsetTop + aboutSection.offsetHeight;
-                    const pastAbout = scrollY > aboutBottom;
-                    setShouldHideOnScroll(pastAbout);
-                    
-                    if (pastAbout) {
-                        // Clear previous timeout
-                        if (scrollTimeoutRef.current) {
-                            clearTimeout(scrollTimeoutRef.current);
-                        }
-                        
-                        // Set scrolling state
-                        setIsScrolling(true);
-                        
-                        // Set timeout to detect when scrolling stops
-                        scrollTimeoutRef.current = setTimeout(() => {
-                            setIsScrolling(false);
-                        }, 150); // 150ms after scrolling stops
-                    }
-                }
+            if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+                setShowNavbar(false);
             } else {
-                // When dock is hidden, navbar stays fixed (no hiding on scroll)
-                setShouldHideOnScroll(false);
-                setIsScrolling(false);
+                setShowNavbar(true);
             }
+            
+            setIsScrolled(currentScrollY > 50);
+            lastScrollY.current = currentScrollY;
         };
         
         window.addEventListener("scroll", handleScroll, { passive: true });
@@ -63,11 +41,8 @@ export default function Navbar({ showDock, setShowDock }) {
 
         return () => {
             window.removeEventListener("scroll", handleScroll);
-            if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
-            }
         };
-    }, [showDock]); // Add showDock as dependency
+    }, []);
 
     // 2. MODAL TRANSITION LOGIC
     useEffect(() => {
@@ -81,7 +56,14 @@ export default function Navbar({ showDock, setShowDock }) {
 
     const handleClose = () => {
         setIsAnimating(false);
-        setTimeout(() => setIsOpen(false), 300);
+        setTimeout(() => {
+            setIsOpen(false);
+            setIsMaximized(false);
+        }, 300);
+    };
+
+    const toggleMaximize = () => {
+        setIsMaximized(!isMaximized);
     };
 
     const handleSubmit = async (e) => {
@@ -109,144 +91,310 @@ export default function Navbar({ showDock, setShowDock }) {
                     setShowSuccess(true);
                     setTimeout(() => setShowSuccess(false), 4000);
                 }, 600);
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                alert(`Failed to send message: ${errorData.message || "Unknown error occurred"}`);
             }
         } catch (error) {
             console.error(error);
+            alert("An error occurred while sending your message. Please try again later.");
         } finally {
             setIsSending(false);
         }
     };
 
-    // 3. UI COMPONENTS
-    const FloatingInput = ({ name, label, type = "text", required = false, isTextArea = false }) => {
-        const InputTag = isTextArea ? "textarea" : "input";
-        return (
-            <div className="relative w-full mb-2">
-                <InputTag name={name} type={type} required={required} placeholder=" " 
-                    className={`peer w-full p-3 pt-5 rounded-xl bg-slate-50 border border-transparent focus:border-blue-500 outline-none transition-all text-sm text-slate-800 ${isTextArea ? 'h-32 resize-none' : ''}`} 
-                />
-                <label className="absolute left-3 top-4 text-gray-500 transition-all duration-200 pointer-events-none peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:top-1">
-                    {label}
-                </label>
-            </div>
-        );
-    };
-
     return (
         <>
             {/* SUCCESS NOTIFICATION */}
-            <div className={`fixed top-6 right-6 z-[200] w-80 transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${showSuccess ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0"}`}>
-                <div className="bg-white border border-slate-200 p-4 rounded-3xl shadow-xl flex items-center gap-4">
-                    <div className="bg-green-500 h-11 w-11 rounded-full flex items-center justify-center text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            <div className={`fixed top-4 sm:top-6 right-2 sm:right-6 z-[200] w-[calc(100%-1rem)] sm:w-80 max-w-sm transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${showSuccess ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0"}`}>
+                <div className="bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-xl flex items-center gap-3 sm:gap-4">
+                    <div className="bg-green-500 h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-white shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </div>
-                    <div>
-                        <h4 className="font-bold text-sm text-slate-800">Success</h4>
-                        <p className="text-xs text-slate-500">Message sent successfully.</p>
+                    <div className="min-w-0">
+                        <h4 className="font-bold text-xs sm:text-sm text-slate-800 truncate">Success</h4>
+                        <p className="text-[11px] sm:text-xs text-slate-500 truncate">Message sent successfully.</p>
                     </div>
                 </div>
             </div>
 
             {/* NAVBAR */}
-            <nav className={`fixed top-0 left-0 w-full h-15 z-50 transition-all duration-700
-                ${isScrolled ? "bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-md" : "bg-transparent border-b border-transparent"}
-                ${shouldHideOnScroll && isScrolling ? "-translate-y-full" : "translate-y-0"}`}>
+            <nav className={`fixed top-0 left-0 w-full h-12 z-50 transition-all duration-500 ease-in-out
+                ${showNavbar ? "translate-y-0" : "-translate-y-full"}
+                ${isScrolled || isMobileMenuOpen ? "bg-white/10 backdrop-blur-md border-b border-white/10 shadow-sm" : "bg-transparent border-b border-transparent"}`}>
                 
-                <div className="max-w-7xl mx-auto h-full px-10 grid grid-cols-3 items-center">
+                <div className="max-w-7xl mx-auto h-full px-3 sm:px-4 md:px-10 flex items-center justify-between gap-4">
                     
-                    {/* LEFT: EMPTY SLOT FOR GRID ALIGNMENT */}
-                    <div className="flex justify-start"></div>
-
-                    {/* CENTER: LOGO AND NAVLINKS TOGGLE */}
-                    <div ref={logoRef} className="flex justify-center opacity-0 overflow-hidden relative items-center h-full">
-                        {/* LOGO (Visible when Dock is shown) */}
-                        <div className={`transition-all duration-500 transform absolute ${!showDock ? "-translate-y-10 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}>
-                            <h1 
-                                onClick={() => {
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    // Remove any hash from URL
-                                    if (window.location.hash) {
-                                        window.history.pushState("", document.title, window.location.pathname + window.location.search);
-                                    }
-                                }}
-                                className="font-black text-xl md:text-2xl lg:text-3xl tracking-tighter flex items-center text-slate-800 cursor-pointer whitespace-nowrap hover:scale-105 transition-transform duration-200"
-                            >
-                                <span className={`transition-all duration-500 ease-out ${isScrolled ? "text-blue-600 opacity-100 w-auto pr-1" : "opacity-0 w-0 overflow-hidden"}`}>&lt;</span>
-                                <span>Benikam</span>
-                                <span className={`ml-1 transition-colors duration-500 ${isScrolled ? "text-blue-600" : "text-slate-800"}`}>Srikar</span>
-                                <span className={`transition-all duration-500 ease-out ${isScrolled ? "text-blue-600 opacity-100 w-auto pl-1" : "opacity-0 w-0 overflow-hidden"}`}>/&gt;</span>
-                            </h1>
-                        </div>
-
-                        {/* NAVLINKS (Visible when Dock is hidden) */}
-                        <div className={`transition-all duration-500 transform absolute inset-0 flex items-center justify-center gap-4 md:gap-6 ${showDock ? "translate-y-10 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}>
-                            {["about","skills","education","projects","activities","certifications"].map((id) => (
-                                <a key={id} href={`#${id}`}
-                                   className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap hover:text-blue-600 transition-colors leading-none">
-                                    {id === "certifications" ? "Certs" : id}
-                                </a>
-                            ))}
-                        </div>
+                    {/* LEFT: LOGO */}
+                    <div ref={logoRef} className="opacity-0">
+                        <h1 
+                            onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                if (window.location.hash) {
+                                    window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                                }
+                            }}
+                            className="font-black text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tighter flex items-center text-slate-800 cursor-pointer whitespace-nowrap hover:scale-105 transition-transform duration-200"
+                        >
+                            <span className={`transition-all duration-500 ease-out ${isScrolled ? "text-blue-600 opacity-100 w-auto pr-1" : "opacity-0 w-0 overflow-hidden"}`}>&lt;</span>
+                            <span>Benikam</span>
+                            <span className={`ml-1 transition-colors duration-500 ${isScrolled ? "text-blue-600" : "text-slate-800"}`}>Srikar</span>
+                            <span className={`transition-all duration-500 ease-out ${isScrolled ? "text-blue-600 opacity-100 w-auto pl-1" : "opacity-0 w-0 overflow-hidden"}`}>/&gt;</span>
+                        </h1>
                     </div>
 
-                    {/* RIGHT: CONTACT BUTTON */}
-                    <div className="flex justify-end">
-                        <button onClick={() => setIsOpen(true)} className="px-5 md:px-8 py-2 md:py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 text-xs md:text-sm font-medium whitespace-nowrap shadow-sm">
+                    {/* CENTER: NAVLINKS (Desktop) */}
+                    <div ref={controlsRef} className="hidden md:flex items-center gap-6 lg:gap-8 opacity-0">
+                        {["about","skills","education","experience","projects","activities","certifications"].map((id) => (
+                            <a key={id} href={`#${id}`}
+                               onClick={(e) => {
+                                   gsap.fromTo(e.currentTarget, 
+                                       { scale: 0.85, color: "#2563eb" }, 
+                                       { scale: 1, color: "#1e293b", duration: 0.4, ease: "back.out(1.7)" }
+                                   );
+                               }}
+                               className="text-xs lg:text-sm font-bold text-slate-800 uppercase tracking-widest whitespace-nowrap hover:text-blue-600 transition-all duration-200">
+                                {id === "certifications" ? "Certs" : id === "activities" ? "Activities" : id}
+                            </a>
+                        ))}
+                    </div>
+
+                    {/* RIGHT: CONTACT BUTTON & MOBILE MENU */}
+                    <div className="flex justify-end items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
+                        <button onClick={() => setIsOpen(true)} className="px-3 sm:px-4 md:px-8 py-1.5 sm:py-2 md:py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 text-[11px] sm:text-xs md:text-sm font-medium whitespace-nowrap shadow-sm">
                             Contact
+                        </button>
+                        
+                        {/* MOBILE MENU TOGGLE */}
+                        <button 
+                            className="md:hidden p-1.5 sm:p-2 text-slate-800 hover:text-blue-600 transition-colors relative z-[60]"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            {isMobileMenuOpen ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                                </svg>
+                            )}
                         </button>
                     </div>
                 </div>
             </nav>
 
-            {/* MODAL */}
+            {/* MOBILE MENU OVERLAY */}
+            <div className={`fixed inset-0 z-[40] bg-white/95 backdrop-blur-md transition-all duration-300 md:hidden flex flex-col items-center justify-center ${isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+                <div className="flex flex-col items-center gap-8">
+                    {["home", "about","skills","education","experience","projects","activities","certifications"].map((id) => (
+                        <a key={id} href={id === "home" ? "#" : `#${id}`}
+                           onClick={(e) => {
+                               setIsMobileMenuOpen(false);
+                               if (id === "home") {
+                                   e.preventDefault();
+                                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                                   if (window.location.hash) {
+                                       window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                                   }
+                               }
+                               gsap.fromTo(e.currentTarget, 
+                                   { scale: 0.85, color: "#2563eb" }, 
+                                   { scale: 1, color: "#1e293b", duration: 0.4, ease: "back.out(1.7)" }
+                               );
+                           }}
+                           className="text-2xl font-black text-slate-800 uppercase tracking-widest hover:text-blue-600 transition-all duration-200">
+                            {id === "certifications" ? "Certs" : id}
+                        </a>
+                    ))}
+                </div>
+            </div>
+
+            {/* MODAL - macOS Mail Style */}
             {isOpen && (
-                <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
-                    <div className={`bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl w-full max-w-xl relative mx-4 border border-slate-200 transition-all duration-500 transform ${isAnimating ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-10 opacity-0'}`} onClick={(e) => e.stopPropagation()}>
+                <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'}`} onClick={handleClose}>
+                    <div 
+                        className={`bg-[#e8e8e8] shadow-2xl relative overflow-hidden ${
+                            isAnimating ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-10 opacity-0'
+                        }`}
+                        style={{
+                            width: isMaximized ? '100vw' : '95%',
+                            maxWidth: isMaximized ? '100vw' : '768px',
+                            height: isMaximized ? '100vh' : 'auto',
+                            maxHeight: isMaximized ? '100vh' : '90vh',
+                            borderRadius: isMaximized ? '0px' : '8px',
+                            transition: 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         
-                        {/* Centered Modal Title & Close Button */}
-                        <div className="relative w-full mb-8 flex justify-center items-center">
-                            <h2 className="text-2xl md:text-3xl font-black italic text-center uppercase tracking-tight text-slate-800">
-                                <span className="text-blue-600">Get in</span> Touch
-                            </h2>
-                            <button onClick={handleClose} className="absolute right-0 text-slate-400 hover:text-slate-800 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
+                        {/* macOS Window Title Bar */}
+                        <div className="bg-gradient-to-b from-[#e0e0e0] to-[#d1d1d1] border-b border-[#b8b8b8] px-4 py-2.5 flex items-center justify-between">
+                            {/* Window Controls */}
+                            <div className="flex items-center gap-2 group/controls">
+                                {/* Close Button */}
+                                <div className="relative">
+                                    <button 
+                                        onClick={handleClose}
+                                        className="w-3 h-3 rounded-full bg-[#ff5f57] hover:bg-[#ff4136] border border-[#d94942] transition-colors flex items-center justify-center group peer"
+                                        title="Close"
+                                    >
+                                        <svg className="w-2 h-2 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 1L7 7M1 7L7 1" stroke="#4a0000" strokeWidth="1.5" strokeLinecap="round"/>
+                                        </svg>
+                                    </button>
+                                    {/* Tooltip */}
+                                    <div className="absolute left-0 top-6 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
+                                        Close (×)
+                                    </div>
+                                </div>
+                                
+                                {/* Maximize Button */}
+                                <div className="relative">
+                                    <button 
+                                        onClick={toggleMaximize}
+                                        className="w-3 h-3 rounded-full bg-[#28c840] hover:bg-[#1fb437] border border-[#15a82d] transition-colors flex items-center justify-center group peer"
+                                        title={isMaximized ? "Restore" : "Maximize"}
+                                    >
+                                        <svg className="w-1.5 h-1.5 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            {isMaximized ? (
+                                                <path d="M1 3L3 5L5 3M1 3L3 1L5 3" stroke="#004a00" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                                            ) : (
+                                                <path d="M1 1L5 1M1 5L5 5M1 1L1 5M5 1L5 5" stroke="#004a00" strokeWidth="1" strokeLinecap="round"/>
+                                            )}
+                                        </svg>
+                                    </button>
+                                    {/* Tooltip */}
+                                    <div className="absolute left-0 top-6 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
+                                        {isMaximized ? 'Restore (⇲)' : 'Maximize (⛶)'}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Window Title */}
+                            <div className="absolute left-1/2 transform -translate-x-1/2 text-xs font-semibold text-[#4a4a4a] tracking-tight">
+                                New Message
+                            </div>
+                            
+                            <div className="w-16"></div>
                         </div>
 
-                        {/* Form Grid */}
-                        <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
-                            <div className="md:col-span-1"><FloatingInput name="name" label="Name" required /></div>
-                            <div className="md:col-span-1"><FloatingInput name="email" label="Email" type="email" required /></div>
-                            <div className="md:col-span-2"><FloatingInput name="linkedin" label="LinkedIn URL (Optional*)" type="url" /></div>
-                            <div className="md:col-span-2"><FloatingInput name="github" label="GitHub URL (Optional*)" type="url" /></div>
-                            <div className="md:col-span-2"><FloatingInput name="message" label="Message" isTextArea required /></div>
-                            
-                            <button type="submit" disabled={isSending} className={`md:col-span-2 bg-blue-600 text-white font-bold py-4 rounded-2xl mt-4 transition-all active:scale-95 shadow-lg shadow-blue-600/30 ${isSending ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500'}`}>
-                                {isSending ? "Sending..." : "Send Message"}
-                            </button>
+                        {/* Mail Compose Window */}
+                        <form onSubmit={handleSubmit} className={`bg-white flex flex-col`} style={{ height: isMaximized ? 'calc(100vh - 48px)' : 'auto', maxHeight: isMaximized ? 'calc(100vh - 48px)' : 'calc(90vh - 48px)' }}>
+                            {/* Mail Headers */}
+                            <div className="border-b border-[#d1d1d1] flex-shrink-0">
+                                {/* To Field (Your Email) */}
+                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">To:</label>
+                                    <div className="flex-1 text-sm text-[#2a2a2a]">
+                                        benikamsrikar@gmail.com
+                                    </div>
+                                </div>
+
+                                {/* From Field (Full Name) */}
+                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">From:</label>
+                                    <input
+                                        name="name"
+                                        type="text"
+                                        required
+                                        placeholder="Your Full Name"
+                                        className="flex-1 text-sm text-[#2a2a2a] bg-transparent border-none outline-none placeholder:text-[#a0a0a0]"
+                                    />
+                                </div>
+
+                                {/* Email Field */}
+                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Reply-To:</label>
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        required
+                                        placeholder="your.email@example.com"
+                                        className="flex-1 text-sm text-[#2a2a2a] bg-transparent border-none outline-none placeholder:text-[#a0a0a0]"
+                                    />
+                                </div>
+
+                                {/* LinkedIn Field */}
+                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">LinkedIn:</label>
+                                    <input
+                                        name="linkedin"
+                                        type="url"
+                                        placeholder="https://linkedin.com/in/yourprofile (Optional)"
+                                        className="flex-1 text-sm text-[#2a2a2a] bg-transparent border-none outline-none placeholder:text-[#a0a0a0]"
+                                    />
+                                </div>
+
+                                {/* GitHub Field */}
+                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">GitHub:</label>
+                                    <input
+                                        name="github"
+                                        type="url"
+                                        placeholder="https://github.com/yourusername (Optional)"
+                                        className="flex-1 text-sm text-[#2a2a2a] bg-transparent border-none outline-none placeholder:text-[#a0a0a0]"
+                                    />
+                                </div>
+
+                                {/* Subject Field */}
+                                <div className="flex items-center px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Subject:</label>
+                                    <div className="flex-1 text-sm text-[#2a2a2a]">
+                                        Portfolio Contact Request
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Message Body - Flexible Height */}
+                            <div className="p-4 bg-white flex-1 overflow-y-auto">
+                                <textarea
+                                    name="message"
+                                    required
+                                    placeholder="Type your message here..."
+                                    className="w-full h-full text-sm text-[#2a2a2a] bg-transparent border-none outline-none resize-none placeholder:text-[#a0a0a0] leading-relaxed"
+                                    style={{ minHeight: isMaximized ? '400px' : '280px' }}
+                                />
+                            </div>
+
+                            {/* Bottom Toolbar */}
+                            <div className="bg-gradient-to-b from-[#f5f5f5] to-[#e8e8e8] border-t border-[#d1d1d1] px-4 py-3 flex items-center justify-between flex-shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="submit"
+                                        disabled={isSending}
+                                        className={`bg-gradient-to-b from-[#5a9cf4] to-[#4a8ce8] text-white text-xs font-semibold px-6 py-1.5 rounded border border-[#3d7cd4] shadow-sm transition-all ${isSending ? 'opacity-50 cursor-not-allowed' : 'hover:from-[#4a8ce8] hover:to-[#3a7cd8] active:scale-95'}`}
+                                    >
+                                        {isSending ? (
+                                            <span className="flex items-center gap-2">
+                                                <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Sending...
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                                                </svg>
+                                                Send
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                                
+                                <div className="text-[10px] text-[#8a8a8a]">
+                                    {isSending ? 'Sending your message...' : 'Press Send to submit your message'}
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
             )}
-
-            {/* FLOATING EYE TOGGLE (BOTTOM RIGHT) */}
-            <div ref={controlsRef} className="fixed bottom-6 right-6 z-[200] opacity-0 flex flex-col gap-2">
-                <button 
-                    onClick={() => setShowDock(!showDock)}
-                    className={`p-3.5 rounded-full border shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95 ${showDock ? "bg-blue-600 border-blue-500 text-white shadow-blue-200" : "bg-white border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300"}`}
-                >
-                    {showDock ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.5a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                        </svg>
-                    )}
-                </button>
-            </div>
         </>
     );
 }

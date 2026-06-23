@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,15 +9,6 @@ if (typeof window !== "undefined") {
 }
 
 const educationData = [
-  {
-    id: 1,
-    title: "B.Tech in Computer Science and Engineering",
-    institution: "Sasi Institute of Technology and Engineering",
-    period: "Aug 2023 – May 2027",
-    description: "Relevant Coursework: Data Structures, Operating Systems, Computer Networks, DBMS, OOP. Active participant in technical symposiums and hackathon environments.",
-    score: "CGPA: 8.45 / 10",
-    color: "#2563eb",
-  },
   {
     id: 2,
     title: "SSC (Class 10)",
@@ -36,20 +27,29 @@ const educationData = [
     score: "Percentage: 84.5%",
     color: "#7c3aed",
   },
+  {
+    id: 1,
+    title: "B.Tech in Computer Science and Engineering",
+    institution: "Sasi Institute of Technology and Engineering",
+    period: "Aug 2023 – May 2027",
+    description: "Relevant Coursework: Data Structures, Operating Systems, Computer Networks, DBMS, OOP. Active participant in technical symposiums and hackathon environments.",
+    score: "CGPA: 8.45 / 10",
+    color: "#2563eb",
+  },
 ];
 
 // ── SVG sine-wave path dimensions ──────────────────────────────────────────
 // The track runs horizontally. Cards sit on peaks and troughs of the wave.
 // Total width = number of items * step, height = 2 * amplitude + padding
 const STEP      = 380;   // horizontal distance between cards
-const AMP       = 80;    // wave amplitude (peak-to-trough / 2)
-const CARD_HEIGHT = 240; // approximate card height
+const AMP       = 100;    // wave amplitude (peak-to-trough / 2) - increased
+const CARD_HEIGHT = 280; // approximate card height - increased
 const SVG_W     = STEP * (educationData.length + 0.5);
-const SVG_H     = AMP * 2 + CARD_HEIGHT + 120; // increased height to accommodate cards fully
+const SVG_H     = AMP * 2 + CARD_HEIGHT + 180; // increased height to accommodate cards fully
 const MID_Y     = SVG_H / 2;     // centre of the wave
 
 // Card vertical anchor: alternates above/below the mid line
-const cardY = (i) => (i % 2 === 0 ? MID_Y - AMP - 130 : MID_Y + AMP + 20);
+const cardY = (i) => (i % 2 === 0 ? MID_Y - AMP - 150 : MID_Y + AMP + 40);
 
 // Dot sits exactly on the sine wave
 const dotY  = (i) => (i % 2 === 0 ? MID_Y - AMP : MID_Y + AMP);
@@ -79,12 +79,23 @@ function buildWavePath() {
 const WAVE_PATH = buildWavePath();
 
 export default function Education() {
+  const [isMobile, setIsMobile] = useState(false);
   const sectionRef  = useRef(null);
   const trackRef    = useRef(null);   // the wide horizontal strip
   const pathRef     = useRef(null);   // the SVG path for stroke animation
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // ── Vertical scroll with centered path animation ──────────────────────────────────────────
   useEffect(() => {
+    if (isMobile) return;
     const section = sectionRef.current;
     const track   = trackRef.current;
     const path    = pathRef.current;
@@ -136,12 +147,78 @@ export default function Education() {
     return () => ScrollTrigger.getAll().forEach(t => t.kill());
   }, []);
 
+  if (isMobile) {
+    return (
+      <div id="education" className="bg-[#f8faff] font-sans py-16 px-4 min-h-screen relative overflow-hidden">
+        {/* Section heading */}
+        <div className="text-center pb-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
+            My <span className="text-blue-600">Education</span>
+          </h2>
+          <p className="text-slate-500 mt-2 text-xs sm:text-sm">
+            Scroll to journey through my academic path
+          </p>
+        </div>
+
+        {/* Vertical Timeline */}
+        <div className="relative max-w-xl mx-auto pl-8">
+          {/* Vertical line */}
+          <div className="absolute left-3.5 top-2 bottom-2 w-0.5 bg-slate-200"></div>
+
+          <div className="space-y-10">
+            {educationData.map((item) => (
+              <div key={item.id} className="relative">
+                {/* Timeline dot */}
+                <div 
+                  className="absolute -left-7 top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm"
+                  style={{ background: item.color, boxShadow: `0 0 10px ${item.color}66` }}
+                />
+
+                <div 
+                  className="bg-white rounded-2xl p-5 shadow-sm border"
+                  style={{ borderColor: `${item.color}25` }}
+                >
+                  <span
+                    className="inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 border"
+                    style={{
+                      color: item.color,
+                      background: `${item.color}10`,
+                      borderColor: `${item.color}25`,
+                    }}
+                  >
+                    {item.period}
+                  </span>
+
+                  <h3 className="text-sm font-black text-slate-900 mb-1 leading-snug">
+                    {item.title}
+                  </h3>
+                  <h4 className="text-slate-500 text-xs font-semibold mb-3">
+                    {item.institution}
+                  </h4>
+                  <p className="text-slate-500 text-[11px] leading-relaxed mb-3">
+                    {item.description}
+                  </p>
+                  <div
+                    className="text-xs font-bold italic border-t pt-2.5"
+                    style={{ color: item.color, borderColor: `${item.color}15` }}
+                  >
+                    {item.score}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       id="education"
       ref={sectionRef}
       className="bg-[#f8faff] font-sans overflow-visible relative"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "150vh" }}
     >
       {/* Section heading — stays at top */}
       <motion.div
@@ -149,25 +226,25 @@ export default function Education() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.6 }}
-        className="text-center pt-16 pb-4 px-6"
+        className="text-center pt-16 pb-4 px-4 sm:px-6"
       >
-        <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
           My <span className="text-blue-600">Education</span>
         </h2>
-        <p className="text-slate-500 mt-2 text-xs md:text-sm">
+        <p className="text-slate-500 mt-2 text-xs sm:text-sm md:text-base">
           Scroll to journey through my academic path
         </p>
       </motion.div>
 
       {/* ── Centered path container ── */}
-      <div className="flex items-center justify-center w-full" style={{ height: `calc(100vh - 180px)` }}>
+      <div className="flex items-center justify-center w-full" style={{ height: `calc(100vh - 120px)`, minHeight: '700px' }}>
         <div
           ref={trackRef}
           className="relative flex-shrink-0"
           style={{
             width: SVG_W,
             height: SVG_H,
-            maxHeight: '100%',
+            minHeight: '660px',
           }}
         >
         {/* ── SVG sine-wave ── */}

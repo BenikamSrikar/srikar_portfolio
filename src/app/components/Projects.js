@@ -403,15 +403,15 @@ export default function Projects() {
   const toggle = (id) => setExpandedId(prev => prev === id ? null : id);
 
   return (
-    <div id="projects" className="px-6 md:px-10 pt-20 pb-32 flex flex-col items-center bg-white min-h-screen">
+    <div id="projects" className="px-4 sm:px-6 md:px-10 pt-20 pb-32 flex flex-col items-center bg-white min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-10"
+        className="text-center mb-8 md:mb-10"
       >
-        <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
           <span className="text-blue-600">My</span> Projects
         </h2>
       </motion.div>
@@ -419,7 +419,7 @@ export default function Projects() {
       <motion.div
         layout
         transition={{ layout: SPRING }}
-        className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch justify-items-start"
+        className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 items-stretch justify-items-start"
       >
         {projects.map((project, index) => (
           <motion.div

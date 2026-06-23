@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Terminal, Layout, Database, Cpu, Cloud, Box, Film, Palette, Scissors } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -59,6 +59,7 @@ const skillData = {
 };
 
 export default function Skills() {
+  const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef(null);
   const techStackRef = useRef(null);
   const softSkillsRef = useRef(null);
@@ -72,6 +73,16 @@ export default function Skills() {
   const creativeSkillsBottomBarRef = useRef(null);
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     const section  = sectionRef.current;
     const techStack = techStackRef.current;
     const softSkills = softSkillsRef.current;
@@ -143,6 +154,150 @@ export default function Skills() {
     return () => ScrollTrigger.getAll().forEach(t => t.kill());
   }, []);
 
+  if (isMobile) {
+    return (
+      <div id="skills" className="bg-[#f0f4ff] font-sans py-16 px-4 min-h-screen">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-2 mb-10 text-center">
+          <span className="text-3xl font-black italic tracking-tighter uppercase text-blue-600">
+            Skills
+          </span>
+          <span className="text-3xl font-black italic tracking-tighter uppercase text-slate-900">
+            & Technologies
+          </span>
+        </div>
+
+        {/* Content Wrapper */}
+        <div className="max-w-2xl mx-auto space-y-10">
+          
+          {/* Tech Stack Category */}
+          <div className="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-blue-400 mb-4 block">
+              TECH STACK
+            </span>
+            <div className="space-y-6">
+              {Object.entries(skillData).map(([category, data]) => (
+                <div key={category} className="border-b border-slate-100 pb-4 last:border-b-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-md text-blue-700 bg-blue-50">
+                      {data.icon}
+                    </span>
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-700">
+                      {category}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.map((skill) => (
+                      <div
+                        key={skill.name}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-blue-50/20"
+                        style={{ borderColor: data.border }}
+                      >
+                        <img src={skill.logo} alt={skill.name} className="w-4 h-4 object-contain" />
+                        <span className="text-[11px] font-semibold text-slate-700">
+                          {skill.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Creative Skill Stack */}
+          <div className="bg-white border border-amber-100 rounded-3xl p-6 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-500 mb-4 block">
+              CREATIVE SKILLS
+            </span>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="border-b border-slate-100 pb-4">
+                <h4 className="text-xs font-black uppercase text-slate-700 mb-2">3D Animation</h4>
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-200 bg-amber-50/20">
+                    <img src="https://cdn.simpleicons.org/blender/F5792A" alt="Blender" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Blender</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-200 bg-amber-50/20">
+                    <img src="https://cdn.simpleicons.org/houdini/FF7A00" alt="Houdini" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Houdini</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-slate-100 pb-4">
+                <h4 className="text-xs font-black uppercase text-slate-700 mb-2">Video Composition</h4>
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-violet-200 bg-violet-50/20">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/aftereffects/aftereffects-original.svg" alt="After Effects" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">After Effects</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-violet-200 bg-violet-50/20">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/8b/Natron_icon.svg" alt="Natron" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Natron</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-slate-100 pb-4">
+                <h4 className="text-xs font-black uppercase text-slate-700 mb-2">Concept Art</h4>
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-pink-200 bg-pink-50/20">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg" alt="Photoshop" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Photoshop</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-pink-200 bg-pink-50/20">
+                    <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/midjourney.png" alt="Midjourney" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Midjourney</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-black uppercase text-slate-700 mb-2">Video Editing</h4>
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50/20">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/premierepro/premierepro-original.svg" alt="Premiere Pro" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">Premiere Pro</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50/20">
+                    <img src="https://cdn.simpleicons.org/davinciresolve/1A1A1A" alt="DaVinci Resolve" className="w-4 h-4 object-contain" />
+                    <span className="text-[11px] font-semibold text-slate-700">DaVinci Resolve</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Soft Skills Category */}
+          <div className="bg-white border border-purple-100 rounded-3xl p-6 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-purple-500 mb-4 block">
+              SOFT SKILLS
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { title: "Communication", desc: "Clear articulation of concepts to stakeholders" },
+                { title: "Group Discussion", desc: "Active team participation and collaboration" },
+                { title: "Problem Solving", desc: "Analytical approach to complex challenges" },
+                { title: "Teamwork", desc: "Collaborative mindset for collective goals" },
+                { title: "Adaptability", desc: "Quick learner with evolving requirements" },
+                { title: "Time Management", desc: "Efficient prioritization and scheduling" },
+                { title: "Leadership", desc: "Initiative to guide and mentor team members" },
+                { title: "Critical Thinking", desc: "Logical analysis and thoughtful decision making" }
+              ].map((s) => (
+                <div key={s.title} className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                  <h4 className="text-[11px] font-black text-slate-800 mb-1 uppercase tracking-wider">{s.title}</h4>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       id="skills"
@@ -151,12 +306,12 @@ export default function Skills() {
       style={{ height: '100vh' }}
     >
             {/* Header */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-8">
-        <span className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-blue-600">
+      <div className="absolute top-8 sm:top-12 left-1/2 -translate-x-1/2 z-30 flex flex-col sm:flex-row items-center gap-2 sm:gap-8 px-4">
+        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter uppercase text-blue-600">
           Skills
         </span>
-        <div className="w-px h-8 bg-slate-300"></div>
-        <span className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
+        <div className="hidden sm:block w-px h-8 bg-slate-300"></div>
+        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
           Technologies
         </span>
       </div>

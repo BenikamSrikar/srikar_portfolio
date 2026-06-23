@@ -22,7 +22,19 @@ export default function ModelView() {
       0.1,
       1000
     )
-    camera.position.set(0, 0, 55)
+    
+    // Fit calculation - zoomed out to show full model
+    const getFitZ = (w, h) => {
+      const aspect = w / h;
+      if (aspect < 1) {
+        // Portrait / Mobile: Adjust Z based on aspect ratio to fit width
+        return Math.max(50, Math.min(75, 52 / aspect));
+      }
+      // Landscape / Desktop: Standard distance - zoomed out
+      return 65;
+    }
+
+    camera.position.set(0, 0, getFitZ(container.clientWidth, container.clientHeight))
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -40,28 +52,33 @@ export default function ModelView() {
 
     // ---------------- LIGHTING ----------------
     // Warm neutral lighting for white background
-    const ambientLight = new THREE.AmbientLight(0xffffff, 4)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2)
     scene.add(ambientLight)
 
     // Key light — main source, slightly warm white from upper right
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5)
     keyLight.position.set(15, 20, 15)
     scene.add(keyLight)
 
     // Soft fill — low intensity from the left to gently lift shadows
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1.2)
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1)
     fillLight.position.set(-12, 8, 10)
     scene.add(fillLight)
 
     // Subtle backlight — separates the model from the bg
-    const backLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.6)
     backLight.position.set(0, 10, -18)
     scene.add(backLight)
 
-    // Soft underlight — removes harsh bottom shadows
-    const underLight = new THREE.DirectionalLight(0xffffff, 0.5)
-    underLight.position.set(0, -8, 8)
-    scene.add(underLight)
+    // BLUE LIGHT AT TOP
+    const blueTopLight = new THREE.PointLight(0x0099ff, 2)
+    blueTopLight.position.set(0, 25, 5)
+    scene.add(blueTopLight)
+
+    // SAFFRON/ORANGE LIGHT AT BOTTOM
+    const saffronBottomLight = new THREE.PointLight(0xff9500, 2.5)
+    saffronBottomLight.position.set(0, -15, 8)
+    scene.add(saffronBottomLight)
 
     // ---------------- CONTROLS ----------------
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -330,6 +347,7 @@ export default function ModelView() {
       const width = container.clientWidth
       const height = container.clientHeight
       camera.aspect = width / height
+      camera.position.z = getFitZ(width, height)
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)
     }
@@ -377,16 +395,39 @@ export default function ModelView() {
   }, [])
 
   return (
-    <div
-      ref={mountRef}
-      style={{
-        filter: isFocused ? "blur(0px)" : "blur(12px)",
-        opacity: isFocused ? 1 : 0,
-        transition: "filter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out",
-        backgroundColor: "transparent",
-        backgroundImage: "none"
-      }}
-      className="hidden lg:block w-full h-[80vh] bg-transparent"
-    />
+    <div className="w-full h-full relative">
+      <div
+        ref={mountRef}
+        style={{
+          filter: isFocused ? "blur(0px)" : "blur(12px)",
+          opacity: isFocused ? 1 : 0,
+          transition: "filter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out",
+          backgroundColor: "transparent",
+          backgroundImage: "none"
+        }}
+        className="w-full h-full bg-transparent pointer-events-none lg:pointer-events-auto"
+      />
+      
+      {/* XYZ Axis Control */}
+      <div className="absolute bottom-6 left-6 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-4 pointer-events-auto">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          {/* X Axis - Red */}
+          <line x1="50" y1="50" x2="90" y2="50" stroke="#ff0000" strokeWidth="2" />
+          <text x="92" y="52" fontSize="12" fill="#ff0000" fontWeight="bold">X</text>
+          
+          {/* Y Axis - Green */}
+          <line x1="50" y1="50" x2="50" y2="10" stroke="#00ff00" strokeWidth="2" />
+          <text x="48" y="8" fontSize="12" fill="#00ff00" fontWeight="bold">Y</text>
+          
+          {/* Z Axis - Blue */}
+          <line x1="50" y1="50" x2="75" y2="70" stroke="#0099ff" strokeWidth="2" />
+          <text x="77" y="72" fontSize="12" fill="#0099ff" fontWeight="bold">Z</text>
+          
+          {/* Center point */}
+          <circle cx="50" cy="50" r="3" fill="#ffffff" />
+        </svg>
+        <p className="text-xs text-white/70 text-center mt-2 font-mono">Rotation</p>
+      </div>
+    </div>
   )
 }
