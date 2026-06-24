@@ -9,6 +9,9 @@ export default function Navbar() {
     const [isSending, setIsSending] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isMaximized, setIsMaximized] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [showNavbar, setShowNavbar] = useState(true);
     
     const logoRef = useRef(null);
     const controlsRef = useRef(null);
@@ -18,21 +21,6 @@ export default function Navbar() {
         const handleScroll = () => {
             const scrollY = window.scrollY;
             setIsScrolled(scrollY > 50);
-        };
-        
-        window.addEventListener("scroll", handleScroll, { passive: true });
-
-        const tl = gsap.timeline({ delay: 0.3 });
-        tl.fromTo([logoRef.current, controlsRef.current], 
-            { y: -20, opacity: 0 }, 
-            { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "power4.out" }
-        );
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, []);            setIsScrolled(currentScrollY > 50);
-            lastScrollY.current = currentScrollY;
         };
         
         window.addEventListener("scroll", handleScroll, { passive: true });
@@ -92,6 +80,7 @@ export default function Navbar() {
             if (response.ok) {
                 setIsSending(false);
                 setIsSubmitted(true);
+                setShowSuccess(true);
                 
                 // Auto-close after 3 seconds
                 setTimeout(() => {

@@ -202,9 +202,13 @@ export default function ExperienceAndActivities() {
             gap: 32px;
             width: 200%;
             padding: 20px;
-            transition: ${isPlaying ? 'none' : 'transform 0.5s ease-in-out'};
-            transform: translateX(${isPlaying ? 'var(--translate-x)' : translateX + '%'});
-            --translate-x: ${isPlaying ? 'calc(-50% * (var(--frame, 0) / 350))' : '0'};
+            transform: translateX(var(--translate-x, 0%));
+            transition: transform 0.5s ease-in-out;
+          }
+          
+          .slide-track.playing {
+            animation: slideLeftInfinite 35s linear infinite;
+            transition: none;
           }
           
           .slide-track-reverse {
@@ -212,25 +216,17 @@ export default function ExperienceAndActivities() {
             gap: 32px;
             width: 200%;
             padding: 20px;
-            transition: ${isPlayingTech ? 'none' : 'transform 0.5s ease-in-out'};
-            transform: translateX(${isPlayingTech ? 'var(--translate-x-reverse)' : translateXTech + '%'});
-            --translate-x-reverse: ${isPlayingTech ? 'calc(-50% + (50% * (var(--frame, 0) / 350)))' : '0'};
+            transform: translateX(var(--translate-x-reverse, 0%));
+            transition: transform 0.5s ease-in-out;
           }
           
-          ${isPlaying ? `
-            .slide-track {
-              animation: slideLeftInfinite 35s linear infinite;
-            }
-          ` : ''}
-          
-          ${isPlayingTech ? `
-            .slide-track-reverse {
-              animation: slideRightInfinite 35s linear infinite;
-            }
-          ` : ''}
+          .slide-track-reverse.playing {
+            animation: slideRightInfinite 35s linear infinite;
+            transition: none;
+          }
           
           .slide-item {
-            flex: 0 0 calc(50% / ${certifications.length});
+            flex: 0 0 calc(50% / 3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -252,7 +248,7 @@ export default function ExperienceAndActivities() {
           }
           
           .slide-item-tech {
-            flex: 0 0 calc(50% / ${technicalCerts.length});
+            flex: 0 0 calc(50% / 4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -283,11 +279,9 @@ export default function ExperienceAndActivities() {
           
           {/* Slides Container */}
           <div 
-            className="slide-track"
+            className={`slide-track ${isPlaying ? 'playing' : ''}`}
             style={{
-              transform: isPlaying 
-                ? undefined 
-                : `translateX(${translateX}%)`
+              '--translate-x': `${translateX}%`
             }}
           >
             {/* First set */}
@@ -365,11 +359,9 @@ export default function ExperienceAndActivities() {
           
           {/* Slides Container - Reverse Direction */}
           <div 
-            className="slide-track-reverse"
+            className={`slide-track-reverse ${isPlayingTech ? 'playing' : ''}`}
             style={{
-              transform: isPlayingTech 
-                ? undefined 
-                : `translateX(${translateXTech}%)`
+              '--translate-x-reverse': `${translateXTech}%`
             }}
           >
             {/* First set */}
