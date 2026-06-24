@@ -118,10 +118,14 @@ export default function Navbar() {
                 ${showNavbar ? "translate-y-0" : "-translate-y-full"}
                 ${isScrolled || isMobileMenuOpen ? "bg-white/10 backdrop-blur-md border-b border-white/10 shadow-sm" : "bg-transparent border-b border-transparent"}`}>
                 
-                <div className="max-w-7xl mx-auto h-full px-3 sm:px-4 md:px-10 flex items-center justify-between gap-4">
+                {/* Responsive Grid/Flex Shell */}
+                <div className="max-w-7xl mx-auto h-full px-4 md:px-10 flex items-center justify-between md:justify-between relative">
                     
-                    {/* LEFT: LOGO */}
-                    <div ref={logoRef} className="opacity-0">
+                    {/* Placeholder on Mobile to keep Logo Centered */}
+                    <div className="w-8 md:hidden"></div>
+
+                    {/* LOGO (Centered on Mobile, Left-aligned on Tablet/Desktop) */}
+                    <div ref={logoRef} className="opacity-0 mx-auto md:mx-0">
                         <h1 
                             onClick={() => {
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -129,7 +133,7 @@ export default function Navbar() {
                                     window.history.pushState("", document.title, window.location.pathname + window.location.search);
                                 }
                             }}
-                            className="font-black text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tighter flex items-center text-slate-800 cursor-pointer whitespace-nowrap hover:scale-105 transition-transform duration-200"
+                            className="font-black text-lg sm:text-xl md:text-xl lg:text-3xl tracking-tighter flex items-center text-slate-800 cursor-pointer whitespace-nowrap hover:scale-105 transition-transform duration-200"
                         >
                             <span className={`transition-all duration-500 ease-out ${isScrolled ? "text-blue-600 opacity-100 w-auto pr-1" : "opacity-0 w-0 overflow-hidden"}`}>&lt;</span>
                             <span>Benikam</span>
@@ -138,8 +142,8 @@ export default function Navbar() {
                         </h1>
                     </div>
 
-                    {/* CENTER: NAVLINKS (Desktop) */}
-                    <div ref={controlsRef} className="hidden md:flex items-center gap-6 lg:gap-8 opacity-0">
+                    {/* NAVLINKS (Right Corner for Desktop, Pulled Closer on Tablets) */}
+                    <div ref={controlsRef} className="hidden md:flex items-center gap-4 lg:gap-8 opacity-0 ml-auto md:pl-4">
                         {["about","skills","education","experience","projects","credentials"].map((id) => (
                             <a key={id} href={`#${id}`}
                                onClick={(e) => {
@@ -160,11 +164,10 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* RIGHT: MOBILE MENU */}
-                    <div className="flex justify-end items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
-                        {/* MOBILE MENU TOGGLE */}
+                    {/* RIGHT: MOBILE MENU BUTTON */}
+                    <div className="flex justify-end items-center md:hidden shrink-0 z-[60]">
                         <button 
-                            className="md:hidden p-1.5 sm:p-2 text-slate-800 hover:text-blue-600 transition-colors relative z-[60]"
+                            className="p-1.5 sm:p-2 text-slate-800 hover:text-blue-600 transition-colors"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
                             {isMobileMenuOpen ? (
@@ -248,7 +251,6 @@ export default function Navbar() {
                         {/* Success Overlay with Confetti */}
                         {isSubmitted && (
                             <div className="absolute inset-0 bg-white z-50 flex items-center justify-center">
-                                {/* Confetti Animation */}
                                 <style>{`
                                     @keyframes confetti-fall {
                                         0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
@@ -270,7 +272,6 @@ export default function Navbar() {
                                     }
                                 `}</style>
                                 
-                                {/* Generate Confetti Pieces */}
                                 {[...Array(50)].map((_, i) => (
                                     <div
                                         key={i}
@@ -285,7 +286,6 @@ export default function Navbar() {
                                     />
                                 ))}
                                 
-                                {/* Success Checkmark */}
                                 <div className="text-center z-10">
                                     <div className="inline-flex items-center justify-center w-32 h-32 bg-green-500 rounded-full mb-6 shadow-2xl">
                                         <svg className="checkmark w-20 h-20 text-white" viewBox="0 0 52 52">
@@ -300,9 +300,7 @@ export default function Navbar() {
 
                         {/* macOS Window Title Bar */}
                         <div className="bg-gradient-to-b from-[#e0e0e0] to-[#d1d1d1] border-b border-[#b8b8b8] px-4 py-2.5 flex items-center justify-between">
-                            {/* Window Controls */}
                             <div className="flex items-center gap-2 group/controls">
-                                {/* Close Button */}
                                 <div className="relative">
                                     <button 
                                         onClick={handleClose}
@@ -313,13 +311,11 @@ export default function Navbar() {
                                             <path d="M1 1L7 7M1 7L7 1" stroke="#4a0000" strokeWidth="1.5" strokeLinecap="round"/>
                                         </svg>
                                     </button>
-                                    {/* Tooltip */}
                                     <div className="absolute left-0 top-6 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
                                         Close (×)
                                     </div>
                                 </div>
                                 
-                                {/* Maximize Button */}
                                 <div className="relative">
                                     <button 
                                         onClick={toggleMaximize}
@@ -334,26 +330,21 @@ export default function Navbar() {
                                             )}
                                         </svg>
                                     </button>
-                                    {/* Tooltip */}
                                     <div className="absolute left-0 top-6 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-10">
                                         {isMaximized ? 'Restore (⇲)' : 'Maximize (⛶)'}
                                     </div>
                                 </div>
                             </div>
                             
-                            {/* Window Title */}
                             <div className="absolute left-1/2 transform -translate-x-1/2 text-xs font-semibold text-[#4a4a4a] tracking-tight">
                                 New Message
                             </div>
-                            
                             <div className="w-16"></div>
                         </div>
 
                         {/* Mail Compose Window */}
-                        <form onSubmit={handleSubmit} className={`bg-white flex flex-col`} style={{ height: isMaximized ? 'calc(100vh - 48px)' : 'auto', maxHeight: isMaximized ? 'calc(100vh - 48px)' : 'calc(90vh - 48px)' }}>
-                            {/* Mail Headers */}
+                        <form onSubmit={handleSubmit} className="bg-white flex flex-col" style={{ height: isMaximized ? 'calc(100vh - 48px)' : 'auto', maxHeight: isMaximized ? 'calc(100vh - 48px)' : 'calc(90vh - 48px)' }}>
                             <div className="border-b border-[#d1d1d1] flex-shrink-0">
-                                {/* From Field (Full Name) */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">From:</label>
                                     <input
@@ -365,7 +356,6 @@ export default function Navbar() {
                                     />
                                 </div>
 
-                                {/* Email Field */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Email:</label>
                                     <input
@@ -377,7 +367,6 @@ export default function Navbar() {
                                     />
                                 </div>
 
-                                {/* LinkedIn Field */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">LinkedIn:</label>
                                     <input
@@ -388,7 +377,6 @@ export default function Navbar() {
                                     />
                                 </div>
 
-                                {/* GitHub Field */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">GitHub:</label>
                                     <input
@@ -399,7 +387,6 @@ export default function Navbar() {
                                     />
                                 </div>
 
-                                {/* Subject Field */}
                                 <div className="flex items-center px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Subject:</label>
                                     <div className="flex-1 text-sm text-[#2a2a2a]">
@@ -408,7 +395,6 @@ export default function Navbar() {
                                 </div>
                             </div>
 
-                            {/* Message Body - Flexible Height */}
                             <div className="p-4 bg-white flex-1 overflow-y-auto">
                                 <textarea
                                     name="message"
@@ -419,7 +405,6 @@ export default function Navbar() {
                                 />
                             </div>
 
-                            {/* Bottom Toolbar */}
                             <div className="bg-gradient-to-b from-[#f5f5f5] to-[#e8e8e8] border-t border-[#d1d1d1] px-4 py-3 flex items-center justify-between flex-shrink-0">
                                 <div className="flex items-center gap-2">
                                     <button

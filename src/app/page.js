@@ -17,7 +17,7 @@ export default function Home() {
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
-    setStartAnims(true); // Fires the entrance animations and model assembly simultaneously
+    setStartAnims(true); 
   };
 
   return (
@@ -25,9 +25,9 @@ export default function Home() {
       {/* Full-screen Dark Loader Screen */}
       {isLoading && <PageLoader onComplete={handleLoadingComplete} />}
 
-      <main className="bg-[#f8faff] min-h-screen">
+      {/* FIXED: Added w-full and overflow-x-hidden to prevent layout breakdown */}
+      <main className="bg-[#f8faff] min-h-screen w-full overflow-x-hidden">
         <Navbar />
-        {/* We pass the animation state explicitly here */}
         <HomePage startAnimation={startAnims} />
         <About />
         <Skills />
