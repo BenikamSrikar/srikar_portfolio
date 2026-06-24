@@ -50,7 +50,7 @@ export default function ModelView({ startAnimation }) {
 
     // FRONT LIGHTING (Vibrant Blue Profile)
     // Primary front-right key light throwing deep blue over the keyboard and inner bezel
-    const frontBlueKey = new THREE.DirectionalLight(0xffffff, 0.5);
+    const frontBlueKey = new THREE.DirectionalLight(0x191970, 0.5);
     frontBlueKey.position.set(15, 10, 20);
     scene.add(frontBlueKey);
 
