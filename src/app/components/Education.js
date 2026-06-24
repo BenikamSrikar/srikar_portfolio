@@ -38,17 +38,26 @@ const educationData = [
   },
 ];
 
-// ── Horizontal curved pulse dimensions ──────────────────────────────────────────
+// ── Horizontal pulse path dimensions ──────────────────────────────────────────
 const CARD_WIDTH = 300;
-const CARD_HEIGHT = 280;
-const HORIZONTAL_SPACING = 380; // distance between cards horizontally
-const WAVE_AMPLITUDE = 80; // vertical curve amplitude
-const WAVE_CENTER_Y = 180; // center vertical position of the curve
+const CARD_HEIGHT = 260;
+const HORIZONTAL_SPACING = 420; // distance between cards horizontally
+const CURVE_HEIGHT = 120; // how high/low the curve goes
+const WAVE_CENTER_Y = 220; // center vertical position
+const TOTAL_WIDTH = educationData.length * HORIZONTAL_SPACING + 300;
+
+// Calculate checkpoint positions
+const checkpoints = [
+  { x: 150, label: "SSC", direction: "up" },      // First checkpoint - rises UP
+  { x: 150 + HORIZONTAL_SPACING, label: "Intermediate", direction: "down" }, // Goes DOWN
+  { x: 150 + HORIZONTAL_SPACING * 2, label: "B.Tech", direction: "up" }, // Rises UP
+];
 
 export default function Education() {
   const [isMobile, setIsMobile] = useState(false);
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
+  const wavePathRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,12 +68,15 @@ export default function Education() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ── Horizontal scroll animation ──────────────────────────────────────────
+  // ── Horizontal sine wave stroke animation on scroll ──────────────────────────────────────────
   useEffect(() => {
     if (isMobile) return;
     const section = sectionRef.current;
-    const track = trackRef.current;
-    if (!section || !track) return;
+    const path = wavePathRef.current;
+    if (!section || !path) return;
+
+    // Get path length for stroke animation
+    const pathLength = path.getTotalLength();
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -76,25 +88,35 @@ export default function Education() {
       },
     });
 
-    const cards = track.querySelectorAll(".edu-card");
-    const checkpoints = track.querySelectorAll(".edu-checkpoint");
+    // Animate stroke-dashoffset to fill the wave
+    tl.fromTo(
+      path,
+      { strokeDasharray: pathLength, strokeDashoffset: pathLength },
+      { strokeDashoffset: 0, ease: "none" },
+      0
+    );
+
+    // Animate checkpoints
+    const checkpoints = trackRef.current?.querySelectorAll(".edu-checkpoint");
+    const cards = trackRef.current?.querySelectorAll(".edu-card");
 
     educationData.forEach((_, i) => {
-      // Checkpoints scale up
-      tl.fromTo(
-        checkpoints[i],
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2.5)" },
-        i * 0.15
-      );
-
-      // Cards fade in
-      tl.fromTo(
-        cards[i],
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
-        i * 0.15
-      );
+      if (checkpoints?.[i]) {
+        tl.fromTo(
+          checkpoints[i],
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.5)" },
+          i * 0.12
+        );
+      }
+      if (cards?.[i]) {
+        tl.fromTo(
+          cards[i],
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
+          i * 0.12
+        );
+      }
     });
 
     return () => ScrollTrigger.getAll().forEach(t => t.kill());
@@ -171,7 +193,7 @@ export default function Education() {
       id="education"
       ref={sectionRef}
       className="bg-[#f8faff] font-sans relative w-full"
-      style={{ minHeight: "100vh", paddingTop: "80px", paddingBottom: "80px" }}
+      style={{ minHeight: "100vh", paddingTop: "60px", paddingBottom: "60px" }}
     >
       {/* Section heading */}
       <motion.div
@@ -179,7 +201,7 @@ export default function Education() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.6 }}
-        className="text-center px-4 sm:px-6 mb-20"
+        className="text-center px-4 sm:px-6 mb-16"
       >
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tighter uppercase text-slate-900">
           My <span className="text-blue-600">Education</span>
@@ -189,140 +211,148 @@ export default function Education() {
         </p>
       </motion.div>
 
-      {/* ── Horizontal curved pulse container ── */}
-      <div className="w-full px-8 overflow-x-visible">
+      {/* ── Horizontal pulse path container ── */}
+      <div className="w-full overflow-x-auto pb-8">
         <div
           ref={trackRef}
-          className="relative mx-auto flex items-center justify-center"
+          className="relative mx-auto"
           style={{
-            width: "100%",
+            width: `${TOTAL_WIDTH}px`,
             height: "500px",
-            minWidth: "100%",
+            minWidth: "fit-content",
           }}
         >
-          {/* Curved pulse line (SVG) */}
+          {/* Path SVG with stroke animation */}
           <svg
             className="absolute left-0 top-0 w-full h-full"
-            viewBox={`0 0 ${educationData.length * HORIZONTAL_SPACING + 200} 400`}
+            viewBox={`0 0 ${TOTAL_WIDTH} 500`}
             preserveAspectRatio="none"
             style={{ pointerEvents: 'none', zIndex: 1 }}
           >
             <defs>
-              <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#a855f7" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.4" />
+              <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="50%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#06b6d4" />
               </linearGradient>
             </defs>
-            {/* Curved pulse path */}
+            {/* Path: straight -> up -> down -> up -> straight */}
             <path
-              d={`M 0 200 Q ${(educationData.length * HORIZONTAL_SPACING) / 2} ${200 - WAVE_AMPLITUDE}, ${educationData.length * HORIZONTAL_SPACING + 200} 200`}
-              stroke="url(#pulseGradient)"
-              strokeWidth="3"
+              ref={wavePathRef}
+              d={`
+                M 0 ${WAVE_CENTER_Y}
+                L ${checkpoints[0].x} ${WAVE_CENTER_Y}
+                Q ${checkpoints[0].x + HORIZONTAL_SPACING / 3} ${WAVE_CENTER_Y - CURVE_HEIGHT}, ${checkpoints[0].x + HORIZONTAL_SPACING / 2} ${WAVE_CENTER_Y - CURVE_HEIGHT}
+                L ${checkpoints[1].x} ${WAVE_CENTER_Y - CURVE_HEIGHT}
+                Q ${checkpoints[1].x + HORIZONTAL_SPACING / 3} ${WAVE_CENTER_Y}, ${checkpoints[1].x + HORIZONTAL_SPACING / 2} ${WAVE_CENTER_Y + CURVE_HEIGHT}
+                L ${checkpoints[2].x} ${WAVE_CENTER_Y + CURVE_HEIGHT}
+                Q ${checkpoints[2].x + HORIZONTAL_SPACING / 3} ${WAVE_CENTER_Y}, ${checkpoints[2].x + HORIZONTAL_SPACING / 2} ${WAVE_CENTER_Y}
+                L ${TOTAL_WIDTH} ${WAVE_CENTER_Y}
+              `}
+              stroke="url(#pathGradient)"
+              strokeWidth="4"
               fill="none"
               strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
 
           {/* ── Education Cards and Checkpoints ── */}
-          <div
-            style={{
-              position: "relative",
-              width: `${educationData.length * HORIZONTAL_SPACING + 200}px`,
-              height: "100%",
-              margin: "0 auto",
-            }}
-          >
-            {educationData.map((item, i) => {
-              const cardX = i * HORIZONTAL_SPACING + 100;
-              const curveY = WAVE_CENTER_Y + Math.sin((i / (educationData.length - 1)) * Math.PI) * WAVE_AMPLITUDE;
-              
-              return (
-                <div key={item.id} style={{ position: "relative", height: "100%" }}>
-                  {/* Checkpoint on curve */}
-                  <div
-                    className="edu-checkpoint absolute"
-                    style={{
-                      left: `${cardX}px`,
-                      top: `${curveY - 12}px`,
-                      width: "24px",
-                      height: "24px",
-                      zIndex: 20,
-                      opacity: 0,
-                      transform: "translate(-50%, 0)",
-                    }}
-                  >
-                    <div
-                      className="w-6 h-6 rounded-full border-4 border-white shadow-lg"
-                      style={{
-                        background: item.color,
-                        boxShadow: `0 0 0 3px ${item.color}40, 0 4px 12px ${item.color}60`,
-                      }}
-                    />
-                  </div>
+          {educationData.map((item, i) => {
+            const checkpoint = checkpoints[i];
+            const cardY = checkpoint.direction === "up" 
+              ? WAVE_CENTER_Y - CURVE_HEIGHT - 60
+              : WAVE_CENTER_Y + CURVE_HEIGHT + 60;
 
-                  {/* Connector line from checkpoint to card */}
+            return (
+              <div key={item.id} style={{ position: "relative", height: "100%" }}>
+                {/* Checkpoint on path */}
+                <div
+                  className="edu-checkpoint absolute"
+                  style={{
+                    left: `${checkpoint.x}px`,
+                    top: checkpoint.direction === "up" 
+                      ? `${WAVE_CENTER_Y - CURVE_HEIGHT - 12}px`
+                      : `${WAVE_CENTER_Y + CURVE_HEIGHT - 12}px`,
+                    width: "24px",
+                    height: "24px",
+                    zIndex: 20,
+                    opacity: 0,
+                    transform: "translate(-50%, 0)",
+                  }}
+                >
                   <div
+                    className="w-6 h-6 rounded-full border-4 border-white shadow-lg"
                     style={{
-                      position: "absolute",
-                      left: `${cardX - 1}px`,
-                      top: `${curveY + 6}px`,
-                      width: "2px",
-                      height: "60px",
-                      background: `linear-gradient(to bottom, ${item.color}, ${item.color}40)`,
-                      opacity: 0.5,
-                      zIndex: 5,
+                      background: item.color,
+                      boxShadow: `0 0 0 3px ${item.color}40, 0 4px 12px ${item.color}60`,
                     }}
                   />
-
-                  {/* Card */}
-                  <motion.div
-                    className="edu-card absolute"
-                    style={{
-                      left: `${cardX - CARD_WIDTH / 2}px`,
-                      top: `${curveY + 70}px`,
-                      width: `${CARD_WIDTH}px`,
-                      zIndex: 10,
-                      opacity: 0,
-                    }}
-                  >
-                    <div
-                      className="bg-white rounded-2xl p-5 shadow-lg border-2 hover:shadow-xl transition-shadow duration-300 h-full"
-                      style={{ borderColor: `${item.color}30` }}
-                    >
-                      {/* Period badge */}
-                      <span
-                        className="inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 border"
-                        style={{
-                          color: item.color,
-                          background: `${item.color}12`,
-                          borderColor: `${item.color}30`,
-                        }}
-                      >
-                        {item.period}
-                      </span>
-
-                      <h3 className="text-sm font-black text-slate-900 mb-1 leading-snug">
-                        {item.title}
-                      </h3>
-                      <h4 className="text-slate-500 text-xs font-medium mb-2">
-                        {item.institution}
-                      </h4>
-                      <p className="text-slate-500 text-xs leading-relaxed mb-2 line-clamp-2">
-                        {item.description}
-                      </p>
-                      <div
-                        className="text-xs font-bold italic border-t pt-2"
-                        style={{ color: item.color, borderColor: `${item.color}20` }}
-                      >
-                        {item.score}
-                      </div>
-                    </div>
-                  </motion.div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Connector line from checkpoint to card */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${checkpoint.x - 1}px`,
+                    top: checkpoint.direction === "up"
+                      ? `${WAVE_CENTER_Y - CURVE_HEIGHT}px`
+                      : `${WAVE_CENTER_Y + CURVE_HEIGHT + 6}px`,
+                    width: "2px",
+                    height: "50px",
+                    background: `linear-gradient(to ${checkpoint.direction === "up" ? "top" : "bottom"}, ${item.color}, ${item.color}40)`,
+                    opacity: 0.6,
+                    zIndex: 5,
+                  }}
+                />
+
+                {/* Card */}
+                <div
+                  className="edu-card absolute"
+                  style={{
+                    left: `${checkpoint.x - CARD_WIDTH / 2}px`,
+                    top: `${cardY}px`,
+                    width: `${CARD_WIDTH}px`,
+                    zIndex: 10,
+                    opacity: 0,
+                  }}
+                >
+                  <div
+                    className="bg-white rounded-2xl p-5 shadow-lg border-2 hover:shadow-xl transition-shadow duration-300"
+                    style={{ borderColor: `${item.color}30` }}
+                  >
+                    {/* Period badge */}
+                    <span
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 border"
+                      style={{
+                        color: item.color,
+                        background: `${item.color}12`,
+                        borderColor: `${item.color}30`,
+                      }}
+                    >
+                      {item.period}
+                    </span>
+
+                    <h3 className="text-sm font-black text-slate-900 mb-1 leading-snug">
+                      {item.title}
+                    </h3>
+                    <h4 className="text-slate-500 text-xs font-medium mb-2">
+                      {item.institution}
+                    </h4>
+                    <p className="text-slate-500 text-xs leading-relaxed mb-2 line-clamp-2">
+                      {item.description}
+                    </p>
+                    <div
+                      className="text-xs font-bold italic border-t pt-2"
+                      style={{ color: item.color, borderColor: `${item.color}20` }}
+                    >
+                      {item.score}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
