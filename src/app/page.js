@@ -3,8 +3,9 @@ import Navbar from "./components/Navbar";
 import HomePage from "./components/HomePage";
 import About from "./components/About";
 import Skills from "./components/Skills";
-import Projects from "./components/Projects";
 import Education from "./components/Education";
+import Projects from "./components/Projects";
+import Experience from "./components/Experience";
 import ExperienceAndActivities from "./components/ExperienceAndActivities";
 import Footer from "./components/Footer";
 
@@ -17,8 +18,9 @@ export default function Home() {
         <HomePage />
         <About />
         <Skills />
-        <Projects />
         <Education />
+        <Projects />
+        <Experience />
         <ExperienceAndActivities />
         <Footer />
       </main>
