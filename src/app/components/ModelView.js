@@ -55,13 +55,13 @@ export default function ModelView({ startAnimation }) {
     scene.add(frontBlueKey);
 
     // Dedicated point light hovering directly above the keyboard to enhance the glow effect on keys
-    const keyboardBlueGlow = new THREE.PointLight(0x00d2ff, 18, 30);
+    const keyboardBlueGlow = new THREE.PointLight(0x00d2ff, 18, 90);
     keyboardBlueGlow.position.set(0, 2, 12);
     scene.add(keyboardBlueGlow);
 
     // BACK LIGHTING (Crisp White Backlight Profile)
     // Strong rim light behind the model to illuminate the Apple logo and lid edges when closed/opening
-    const backWhiteRim = new THREE.DirectionalLight(0xfffff, 0.5);
+    const backWhiteRim = new THREE.DirectionalLight(0xFFD700, 0.5);
     backWhiteRim.position.set(-15, 15, -25);
     scene.add(backWhiteRim);
 
