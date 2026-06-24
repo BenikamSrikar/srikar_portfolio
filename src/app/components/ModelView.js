@@ -8,18 +8,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 export default function ModelView() {
   const mountRef = useRef(null)
   const [isFocused, setIsFocused] = useState(false)
-  const [shouldInitialize, setShouldInitialize] = useState(false)
-
-  // Defer Three.js initialization to allow main thread time for UI
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShouldInitialize(true)
-    }, 50)
-    return () => clearTimeout(timer)
-  }, [])
 
   useEffect(() => {
-    if (!shouldInitialize || !mountRef.current) return
+    if (!mountRef.current) return
 
     const container = mountRef.current
     const scene = new THREE.Scene()
@@ -140,7 +131,7 @@ export default function ModelView() {
 
     // ---------------- MODEL ----------------
     let mixer = null
-    const clock = new THREE.Clock(true) // Start the clock immediately with autoStart=true
+    const clock = new THREE.Clock()
     const loader = new GLTFLoader()
 
     loader.load("/models/animator.glb", 
