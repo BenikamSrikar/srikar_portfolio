@@ -8,9 +8,18 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 export default function ModelView() {
   const mountRef = useRef(null)
   const [isFocused, setIsFocused] = useState(false)
+  const [shouldInitialize, setShouldInitialize] = useState(false)
+
+  // Defer Three.js initialization to allow main thread time for UI
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldInitialize(true)
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
-    if (!mountRef.current) return
+    if (!shouldInitialize || !mountRef.current) return
 
     const container = mountRef.current
     const scene = new THREE.Scene()
@@ -37,60 +46,36 @@ export default function ModelView() {
     camera.position.set(0, 0, getFitZ(container.clientWidth, container.clientHeight))
 
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: false,
       alpha: true,
       powerPreference: "high-performance",
+      precision: "mediump",
     })
     renderer.setClearColor(0xffffff, 0)
     renderer.setSize(container.clientWidth, container.clientHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
+    renderer.toneMapping = THREE.NoToneMapping
+    renderer.toneMappingExposure = 1.0
 
     container.appendChild(renderer.domElement)
 
     // ---------------- LIGHTING ----------------
     // White lighting for white background - soft and even
     
-    // Ambient light with neutral white tint - increased for overall brightness
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0)
+    // Optimized lighting - reduced for performance
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2)
     scene.add(ambientLight)
 
-    // Key light — White from upper right - main illumination
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.0)
     keyLight.position.set(15, 20, 15)
+    keyLight.castShadow = false
     scene.add(keyLight)
 
-    // Fill light — Strong white from the left to eliminate shadows
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1.8)
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.8)
     fillLight.position.set(-12, 8, 10)
+    fillLight.castShadow = false
     scene.add(fillLight)
-
-    // Backlight — White rim light effect - softer
-    const backLight = new THREE.DirectionalLight(0xffffff, 0.9)
-    backLight.position.set(0, 10, -18)
-    scene.add(backLight)
-
-    // Bottom fill light — Lifts the bottom shadows
-    const bottomFillLight = new THREE.DirectionalLight(0xffffff, 1.5)
-    bottomFillLight.position.set(0, -20, 10)
-    scene.add(bottomFillLight)
-
-    // SOFT WHITE POINT LIGHT AT TOP - rim effect
-    const whiteTopLight = new THREE.PointLight(0xffffff, 1.4)
-    whiteTopLight.position.set(0, 25, 5)
-    scene.add(whiteTopLight)
-
-    // SOFT WHITE POINT LIGHT AT BOTTOM - lifts shadows
-    const whiteBottomLight = new THREE.PointLight(0xffffff, 1.8)
-    whiteBottomLight.position.set(0, -15, 8)
-    scene.add(whiteBottomLight)
-
-    // ADDITIONAL WHITE POINT LIGHT - front fill light
-    const whiteFrontLight = new THREE.PointLight(0xffffff, 1.4)
-    whiteFrontLight.position.set(0, 0, 25)
-    scene.add(whiteFrontLight)
 
     // ---------------- CONTROLS ----------------
     const controls = new OrbitControls(camera, renderer.domElement)
