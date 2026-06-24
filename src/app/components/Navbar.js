@@ -9,9 +9,6 @@ export default function Navbar() {
     const [isSending, setIsSending] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [showNavbar, setShowNavbar] = useState(true);
-    const [isMaximized, setIsMaximized] = useState(false);
-    const lastScrollY = useRef(0);
     
     const logoRef = useRef(null);
     const controlsRef = useRef(null);
@@ -19,15 +16,22 @@ export default function Navbar() {
     // 1. SCROLL & ENTRANCE ANIMATIONS
     useEffect(() => {
         const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            
-            if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
-                setShowNavbar(false);
-            } else {
-                setShowNavbar(true);
-            }
-            
-            setIsScrolled(currentScrollY > 50);
+            const scrollY = window.scrollY;
+            setIsScrolled(scrollY > 50);
+        };
+        
+        window.addEventListener("scroll", handleScroll, { passive: true });
+
+        const tl = gsap.timeline({ delay: 0.3 });
+        tl.fromTo([logoRef.current, controlsRef.current], 
+            { y: -20, opacity: 0 }, 
+            { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "power4.out" }
+        );
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);            setIsScrolled(currentScrollY > 50);
             lastScrollY.current = currentScrollY;
         };
         
@@ -59,6 +63,7 @@ export default function Navbar() {
         setTimeout(() => {
             setIsOpen(false);
             setIsMaximized(false);
+            setIsSubmitted(false);
         }, 300);
     };
 
@@ -85,20 +90,21 @@ export default function Navbar() {
             });
 
             if (response.ok) {
-                handleClose();
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                setIsSending(false);
+                setIsSubmitted(true);
+                
+                // Auto-close after 3 seconds
                 setTimeout(() => {
-                    setShowSuccess(true);
-                    setTimeout(() => setShowSuccess(false), 4000);
-                }, 600);
+                    handleClose();
+                }, 3000);
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 alert(`Failed to send message: ${errorData.message || "Unknown error occurred"}`);
+                setIsSending(false);
             }
         } catch (error) {
             console.error(error);
             alert("An error occurred while sending your message. Please try again later.");
-        } finally {
             setIsSending(false);
         }
     };
@@ -145,26 +151,28 @@ export default function Navbar() {
 
                     {/* CENTER: NAVLINKS (Desktop) */}
                     <div ref={controlsRef} className="hidden md:flex items-center gap-6 lg:gap-8 opacity-0">
-                        {["about","skills","education","experience","projects","activities","certifications"].map((id) => (
+                        {["about","skills","education","experience","projects","credentials"].map((id) => (
                             <a key={id} href={`#${id}`}
                                onClick={(e) => {
+                                   e.preventDefault();
+                                   const targetId = id === "credentials" ? "activities" : id;
+                                   const element = document.getElementById(targetId);
+                                   if (element) {
+                                       element.scrollIntoView({ behavior: 'auto', block: 'start' });
+                                   }
                                    gsap.fromTo(e.currentTarget, 
                                        { scale: 0.85, color: "#2563eb" }, 
                                        { scale: 1, color: "#1e293b", duration: 0.4, ease: "back.out(1.7)" }
                                    );
                                }}
                                className="text-xs lg:text-sm font-bold text-slate-800 uppercase tracking-widest whitespace-nowrap hover:text-blue-600 transition-all duration-200">
-                                {id === "certifications" ? "Certs" : id === "activities" ? "Activities" : id}
+                                {id}
                             </a>
                         ))}
                     </div>
 
-                    {/* RIGHT: CONTACT BUTTON & MOBILE MENU */}
+                    {/* RIGHT: MOBILE MENU */}
                     <div className="flex justify-end items-center gap-1 sm:gap-2 md:gap-3 shrink-0">
-                        <button onClick={() => setIsOpen(true)} className="px-3 sm:px-4 md:px-8 py-1.5 sm:py-2 md:py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 text-[11px] sm:text-xs md:text-sm font-medium whitespace-nowrap shadow-sm">
-                            Contact
-                        </button>
-                        
                         {/* MOBILE MENU TOGGLE */}
                         <button 
                             className="md:hidden p-1.5 sm:p-2 text-slate-800 hover:text-blue-600 transition-colors relative z-[60]"
@@ -190,15 +198,21 @@ export default function Navbar() {
             {/* MOBILE MENU OVERLAY */}
             <div className={`fixed inset-0 z-[40] bg-white/95 backdrop-blur-md transition-all duration-300 md:hidden flex flex-col items-center justify-center ${isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
                 <div className="flex flex-col items-center gap-8">
-                    {["home", "about","skills","education","experience","projects","activities","certifications"].map((id) => (
+                    {["home", "about","skills","education","experience","projects","credentials"].map((id) => (
                         <a key={id} href={id === "home" ? "#" : `#${id}`}
                            onClick={(e) => {
+                               e.preventDefault();
                                setIsMobileMenuOpen(false);
                                if (id === "home") {
-                                   e.preventDefault();
-                                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                                   window.scrollTo({ top: 0, behavior: 'auto' });
                                    if (window.location.hash) {
                                        window.history.pushState("", document.title, window.location.pathname + window.location.search);
+                                   }
+                               } else {
+                                   const targetId = id === "credentials" ? "activities" : id;
+                                   const element = document.getElementById(targetId);
+                                   if (element) {
+                                       element.scrollIntoView({ behavior: 'auto', block: 'start' });
                                    }
                                }
                                gsap.fromTo(e.currentTarget, 
@@ -207,11 +221,22 @@ export default function Navbar() {
                                );
                            }}
                            className="text-2xl font-black text-slate-800 uppercase tracking-widest hover:text-blue-600 transition-all duration-200">
-                            {id === "certifications" ? "Certs" : id}
+                            {id}
                         </a>
                     ))}
                 </div>
             </div>
+
+            {/* FLOATING CONTACT BUTTON - Bottom Right */}
+            <button 
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 hover:scale-110 active:scale-95 flex items-center justify-center group"
+                title="Contact Me"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </button>
 
             {/* MODAL - macOS Mail Style */}
             {isOpen && (
@@ -231,6 +256,59 @@ export default function Navbar() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         
+                        {/* Success Overlay with Confetti */}
+                        {isSubmitted && (
+                            <div className="absolute inset-0 bg-white z-50 flex items-center justify-center">
+                                {/* Confetti Animation */}
+                                <style>{`
+                                    @keyframes confetti-fall {
+                                        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+                                        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                                    }
+                                    .confetti {
+                                        position: absolute;
+                                        width: 10px;
+                                        height: 10px;
+                                        animation: confetti-fall 3s linear forwards;
+                                    }
+                                    @keyframes checkmark {
+                                        0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+                                        50% { transform: scale(1.2) rotate(-45deg); opacity: 1; }
+                                        100% { transform: scale(1) rotate(-45deg); opacity: 1; }
+                                    }
+                                    .checkmark {
+                                        animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+                                    }
+                                `}</style>
+                                
+                                {/* Generate Confetti Pieces */}
+                                {[...Array(50)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="confetti"
+                                        style={{
+                                            left: `${Math.random() * 100}%`,
+                                            top: '-10px',
+                                            backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#a29bfe'][Math.floor(Math.random() * 6)],
+                                            animationDelay: `${Math.random() * 0.5}s`,
+                                            animationDuration: `${2 + Math.random() * 2}s`,
+                                        }}
+                                    />
+                                ))}
+                                
+                                {/* Success Checkmark */}
+                                <div className="text-center z-10">
+                                    <div className="inline-flex items-center justify-center w-32 h-32 bg-green-500 rounded-full mb-6 shadow-2xl">
+                                        <svg className="checkmark w-20 h-20 text-white" viewBox="0 0 52 52">
+                                            <path fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" d="M14 27l8 8 16-16" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-3xl font-bold text-green-600 mb-2">Message Sent!</h3>
+                                    <p className="text-slate-600">Thank you for reaching out. I'll get back to you soon.</p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* macOS Window Title Bar */}
                         <div className="bg-gradient-to-b from-[#e0e0e0] to-[#d1d1d1] border-b border-[#b8b8b8] px-4 py-2.5 flex items-center justify-between">
                             {/* Window Controls */}
@@ -286,14 +364,6 @@ export default function Navbar() {
                         <form onSubmit={handleSubmit} className={`bg-white flex flex-col`} style={{ height: isMaximized ? 'calc(100vh - 48px)' : 'auto', maxHeight: isMaximized ? 'calc(100vh - 48px)' : 'calc(90vh - 48px)' }}>
                             {/* Mail Headers */}
                             <div className="border-b border-[#d1d1d1] flex-shrink-0">
-                                {/* To Field (Your Email) */}
-                                <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
-                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">To:</label>
-                                    <div className="flex-1 text-sm text-[#2a2a2a]">
-                                        benikamsrikar@gmail.com
-                                    </div>
-                                </div>
-
                                 {/* From Field (Full Name) */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
                                     <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">From:</label>
@@ -308,7 +378,7 @@ export default function Navbar() {
 
                                 {/* Email Field */}
                                 <div className="flex items-center border-b border-[#e8e8e8] px-4 py-2 bg-gradient-to-b from-white to-[#fafafa]">
-                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Reply-To:</label>
+                                    <label className="text-xs font-semibold text-[#6a6a6a] w-20 shrink-0">Email:</label>
                                     <input
                                         name="email"
                                         type="email"

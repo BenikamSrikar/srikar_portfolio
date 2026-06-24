@@ -4,11 +4,12 @@ import ModelView from "./ModelView";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { TypeAnimation } from 'react-type-animation';
-import ConnectionDots from './ConnectionDots';
 
 export default function HomePage() {
   const containerRef = useRef(null);
   const morphTextRef = useRef(null);
+  const gridRef = useRef(null);
+  const animationFrameIdRef = useRef(null);
 
   const roles = useMemo(() => [
     "Software Engineer.",
@@ -47,6 +48,94 @@ export default function HomePage() {
     }, 0.35);
 
   }, { scope: containerRef });
+
+  // Raindrops animation with blue text
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = grid.offsetWidth;
+    canvas.height = grid.offsetHeight;
+    canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    `;
+    
+    grid.appendChild(canvas);
+
+    // Create fewer raindrops - less dense
+    const dropCount = Math.floor(canvas.width / 100);
+    const drops = Array(dropCount).fill(0).map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      speed: 1 + Math.random() * 1.5, // Slow speed
+      opacity: Math.random() * 0.5 + 0.3
+    }));
+
+    const binary = '01';
+    let animationId;
+
+    const draw = () => {
+      // Clear canvas with white background
+      ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Blue color for binary text
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 10px monospace'; // Small font size
+      ctx.shadowColor = 'rgba(59, 130, 246, 0.3)';
+      ctx.shadowBlur = 4;
+
+      for (let i = 0; i < drops.length; i++) {
+        const drop = drops[i];
+        
+        // Random binary digit
+        const text = binary[Math.floor(Math.random() * binary.length)];
+        
+        // Set opacity for fade effect
+        ctx.globalAlpha = drop.opacity;
+        ctx.fillText(text, drop.x, drop.y);
+        ctx.globalAlpha = 1;
+
+        // Move drop down slowly
+        drop.y += drop.speed;
+
+        // Reset drop position when it goes off screen
+        if (drop.y > canvas.height) {
+          drop.y = -20;
+          drop.x = Math.random() * canvas.width;
+          drop.opacity = Math.random() * 0.5 + 0.3;
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    // Handle resize
+    const handleResize = () => {
+      canvas.width = grid.offsetWidth;
+      canvas.height = grid.offsetHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+      if (canvas.parentNode) {
+        canvas.parentNode.removeChild(canvas);
+      }
+    };
+  }, []);
 
   // Morph cut text animation – desktop only
   useEffect(() => {
@@ -139,16 +228,26 @@ export default function HomePage() {
     <section
       id="home"
       ref={containerRef}
-      className="relative w-screen min-h-screen bg-[#f8faff] overflow-visible"
+      className="relative w-screen h-screen bg-white overflow-hidden"
     >
-      {/* Background connection dots */}
-      <ConnectionDots />
+      {/* Binary Rainfall Background */}
+      <div 
+        ref={gridRef}
+        className="absolute inset-0 w-full h-full overflow-hidden z-0"
+      />
+
+      <style>{`
+        @keyframes tileFade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
 
       {/* Full screen 2-column layout */}
-      <div className="relative flex w-screen min-h-screen">
+      <div className="relative flex w-screen h-screen z-10">
         {/* Text content on left - 50% width */}
-        <div className="w-1/2 flex flex-col items-start justify-center px-16 py-8">
-          <h2 className="hp-animate-top welcome-glow text-xl font-medium text-slate-500 mb-6">
+        <div className="w-1/2 flex flex-col items-start justify-center px-16">
+          <h2 className="hp-animate-top welcome-glow text-xl font-medium text-slate-600 mb-6">
             Welcome to my portfolio
           </h2>
 
@@ -159,29 +258,34 @@ export default function HomePage() {
           <div className="hp-animate-fade mb-6">
             <span
               ref={morphTextRef}
-              className="text-3xl font-bold text-amber-500 inline-block font-mono tracking-wider"
+              className="text-3xl font-bold text-blue-500 inline-block font-mono tracking-wider"
             >
               Software Engineer.
             </span>
           </div>
 
-          <p className="hp-animate-left text-slate-600 text-base leading-relaxed max-w-md mb-8">
+          <p className="hp-animate-left text-slate-700 text-base leading-relaxed max-w-md mb-8">
             I specialize in designing scalable backend architectures, REST APIs, and real-time applications.
             My focus involves event-driven systems, WebRTC communication, and AI-integrated solutions.
           </p>
 
-          <div className="hp-animate-bottom">
+          <div className="hp-animate-bottom flex gap-4">
             <a href="#about">
               <button className="bg-white text-blue-700 font-semibold py-3 px-12 rounded-full border-2 border-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.15)] hover:bg-blue-600 hover:text-white hover:border-transparent transition-all duration-300 hover:scale-105 active:scale-95">
                 Explore &rarr;
+              </button>
+            </a>
+            <a href="/resume.pdf" download="Benikam_Srikar_Resume.pdf">
+              <button className="bg-orange-500 text-white font-semibold py-3 px-12 rounded-full border-2 border-orange-600 shadow-[0_0_15px_rgba(249,115,22,0.15)] hover:bg-orange-600 hover:border-orange-700 transition-all duration-300 hover:scale-105 active:scale-95">
+                Download Resume
               </button>
             </a>
           </div>
         </div>
 
         {/* Model on right - 50% width */}
-        <div className="w-1/2 flex items-center justify-center px-16 py-8">
-          <div className="hp-model-fade w-full h-full max-h-[90vh] flex items-center justify-center">
+        <div className="w-1/2 flex items-center justify-center px-16">
+          <div className="hp-model-fade w-full h-full flex items-center justify-center">
             <ModelView />
           </div>
         </div>

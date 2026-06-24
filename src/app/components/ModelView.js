@@ -28,10 +28,10 @@ export default function ModelView() {
       const aspect = w / h;
       if (aspect < 1) {
         // Portrait / Mobile: Adjust Z based on aspect ratio to fit width
-        return Math.max(50, Math.min(75, 52 / aspect));
+        return Math.max(60, Math.min(90, 65 / aspect));
       }
-      // Landscape / Desktop: Standard distance - zoomed out
-      return 65;
+      // Landscape / Desktop: Standard distance - zoomed out further
+      return 85;
     }
 
     camera.position.set(0, 0, getFitZ(container.clientWidth, container.clientHeight))
@@ -41,44 +41,56 @@ export default function ModelView() {
       alpha: true,
       powerPreference: "high-performance",
     })
-    renderer.setClearColor(0xf8faff, 0)
+    renderer.setClearColor(0xffffff, 0)
     renderer.setSize(container.clientWidth, container.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.5
+    renderer.toneMappingExposure = 1.2
 
     container.appendChild(renderer.domElement)
 
     // ---------------- LIGHTING ----------------
-    // Warm neutral lighting for white background
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2)
+    // White lighting for white background - soft and even
+    
+    // Ambient light with neutral white tint - increased for overall brightness
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0)
     scene.add(ambientLight)
 
-    // Key light — main source, slightly warm white from upper right
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5)
+    // Key light — White from upper right - main illumination
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5)
     keyLight.position.set(15, 20, 15)
     scene.add(keyLight)
 
-    // Soft fill — low intensity from the left to gently lift shadows
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1)
+    // Fill light — Strong white from the left to eliminate shadows
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.8)
     fillLight.position.set(-12, 8, 10)
     scene.add(fillLight)
 
-    // Subtle backlight — separates the model from the bg
-    const backLight = new THREE.DirectionalLight(0xffffff, 0.6)
+    // Backlight — White rim light effect - softer
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.9)
     backLight.position.set(0, 10, -18)
     scene.add(backLight)
 
-    // BLUE LIGHT AT TOP
-    const blueTopLight = new THREE.PointLight(0x0099ff, 2)
-    blueTopLight.position.set(0, 25, 5)
-    scene.add(blueTopLight)
+    // Bottom fill light — Lifts the bottom shadows
+    const bottomFillLight = new THREE.DirectionalLight(0xffffff, 1.5)
+    bottomFillLight.position.set(0, -20, 10)
+    scene.add(bottomFillLight)
 
-    // SAFFRON/ORANGE LIGHT AT BOTTOM
-    const saffronBottomLight = new THREE.PointLight(0xff9500, 2.5)
-    saffronBottomLight.position.set(0, -15, 8)
-    scene.add(saffronBottomLight)
+    // SOFT WHITE POINT LIGHT AT TOP - rim effect
+    const whiteTopLight = new THREE.PointLight(0xffffff, 1.4)
+    whiteTopLight.position.set(0, 25, 5)
+    scene.add(whiteTopLight)
+
+    // SOFT WHITE POINT LIGHT AT BOTTOM - lifts shadows
+    const whiteBottomLight = new THREE.PointLight(0xffffff, 1.8)
+    whiteBottomLight.position.set(0, -15, 8)
+    scene.add(whiteBottomLight)
+
+    // ADDITIONAL WHITE POINT LIGHT - front fill light
+    const whiteFrontLight = new THREE.PointLight(0xffffff, 1.4)
+    whiteFrontLight.position.set(0, 0, 25)
+    scene.add(whiteFrontLight)
 
     // ---------------- CONTROLS ----------------
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -408,8 +420,8 @@ export default function ModelView() {
         className="w-full h-full bg-transparent pointer-events-none lg:pointer-events-auto"
       />
       
-      {/* XYZ Axis Control */}
-      <div className="absolute bottom-6 left-6 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-4 pointer-events-auto">
+      {/* XYZ Axis Control - Hidden */}
+      <div className="absolute bottom-6 left-6 w-32 h-32 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-4 pointer-events-auto hidden">
         <svg viewBox="0 0 100 100" className="w-full h-full">
           {/* X Axis - Red */}
           <line x1="50" y1="50" x2="90" y2="50" stroke="#ff0000" strokeWidth="2" />

@@ -38,45 +38,18 @@ const educationData = [
   },
 ];
 
-// ── SVG sine-wave path dimensions ──────────────────────────────────────────
-// The track runs horizontally. Cards sit on peaks and troughs of the wave.
-// Total width = number of items * step, height = 2 * amplitude + padding
-const STEP      = 380;   // horizontal distance between cards
-const AMP       = 100;    // wave amplitude (peak-to-trough / 2) - increased
-const CARD_HEIGHT = 280; // approximate card height - increased
-const SVG_W     = STEP * (educationData.length + 0.5);
-const SVG_H     = AMP * 2 + CARD_HEIGHT + 180; // increased height to accommodate cards fully
-const MID_Y     = SVG_H / 2;     // centre of the wave
+// ── Timeline dimensions ──────────────────────────────────────────
+const STEP = 400; // horizontal distance between checkpoints
+const TIMELINE_Y = 100; // vertical position of the horizontal line
+const CARD_WIDTH = 320;
+const CARD_TOP_MARGIN = 60; // space between checkpoint and card top
 
-// Card vertical anchor: alternates above/below the mid line
-const cardY = (i) => (i % 2 === 0 ? MID_Y - AMP - 150 : MID_Y + AMP + 40);
+const SVG_W = STEP * (educationData.length + 1);
+const SVG_H = 600; // enough height for cards hanging below
 
-// Dot sits exactly on the sine wave
-const dotY  = (i) => (i % 2 === 0 ? MID_Y - AMP : MID_Y + AMP);
-const dotX  = (i) => STEP * 0.5 + STEP * i;
-
-// Build a smooth SVG sine-wave path across all dots
-function buildWavePath() {
-  const points = educationData.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
-  // extend a bit before first and after last
-  const startX = dotX(0) - STEP * 0.5;
-  const endX   = dotX(educationData.length - 1) + STEP * 0.5;
-
-  let d = `M ${startX} ${MID_Y}`;
-  // curve through each dot with cubic bezier
-  points.forEach((p, i) => {
-    const prev = i === 0 ? { x: startX, y: MID_Y } : points[i - 1];
-    const cpX = (prev.x + p.x) / 2;
-    d += ` C ${cpX} ${prev.y} ${cpX} ${p.y} ${p.x} ${p.y}`;
-  });
-  // continue to end
-  const last = points[points.length - 1];
-  const cpX  = (last.x + endX) / 2;
-  d += ` C ${cpX} ${last.y} ${cpX} ${MID_Y} ${endX} ${MID_Y}`;
-  return d;
-}
-
-const WAVE_PATH = buildWavePath();
+const checkpointX = (i) => STEP * (i + 0.8);
+const cardX = (i) => checkpointX(i) - CARD_WIDTH / 2;
+const cardY = TIMELINE_Y + CARD_TOP_MARGIN;
 
 export default function Education() {
   const [isMobile, setIsMobile] = useState(false);
@@ -93,54 +66,51 @@ export default function Education() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ── Vertical scroll with centered path animation ──────────────────────────────────────────
+  // ── Horizontal timeline scroll animation ──────────────────────────────────────────
   useEffect(() => {
     if (isMobile) return;
     const section = sectionRef.current;
     const track   = trackRef.current;
-    const path    = pathRef.current;
-    if (!section || !track || !path) return;
-
-    // Animate SVG stroke draw from left to right
-    const pathLen = path.getTotalLength();
-    gsap.set(path, { strokeDasharray: pathLen, strokeDashoffset: pathLen });
+    const line    = trackRef.current?.querySelector('.timeline-line');
+    if (!section || !track || !line) return;
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: () => `+=${window.innerHeight * 2.5}`,
+        end: () => `+=${window.innerHeight * 1.5}`,
         pin: true,
         pinSpacing: true,
-        scrub: 1.5,
+        scrub: 1,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       },
     });
 
-    // Draw the sine wave
-    tl.to(path, { strokeDashoffset: 0, ease: "none", duration: 1 }, 0);
+    // Animate timeline line from left to right
+    tl.fromTo(line,
+      { scaleX: 0 },
+      { scaleX: 1, ease: "none", duration: 0.6, transformOrigin: "left center" },
+      0
+    );
 
-    // Cards and dots — each appears exactly when the wave drawing reaches it
+    // Show all checkpoints and cards
     const cards = track.querySelectorAll(".edu-card");
-    const dots  = track.querySelectorAll(".edu-dot");
+    const checkpoints = track.querySelectorAll(".edu-checkpoint");
 
     educationData.forEach((_, i) => {
-      // Wave reaches dot i at roughly this progress point in the timeline
-      const waveArrival = (i + 0.55) / (educationData.length + 0.5);
-
-      // Dot pops in right as wave reaches it
-      tl.fromTo(dots[i],
+      // Checkpoints appear
+      tl.fromTo(checkpoints[i],
         { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.06, ease: "back.out(2.5)" },
-        waveArrival
+        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2.5)" },
+        0.2 + (i * 0.15)
       );
 
-      // Card fades in just after the dot
+      // Cards drop down from checkpoints
       tl.fromTo(cards[i],
-        { opacity: 0, y: i % 2 === 0 ? 16 : -16 },
-        { opacity: 1, y: 0, duration: 0.1, ease: "power2.out" },
-        waveArrival + 0.04
+        { opacity: 0, y: -30 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+        0.3 + (i * 0.15)
       );
     });
 
@@ -218,7 +188,7 @@ export default function Education() {
       id="education"
       ref={sectionRef}
       className="bg-[#f8faff] font-sans overflow-visible relative"
-      style={{ minHeight: "150vh" }}
+      style={{ minHeight: "100vh" }}
     >
       {/* Section heading — stays at top */}
       <motion.div
@@ -236,132 +206,107 @@ export default function Education() {
         </p>
       </motion.div>
 
-      {/* ── Centered path container ── */}
-      <div className="flex items-center justify-center w-full" style={{ height: `calc(100vh - 120px)`, minHeight: '700px' }}>
+      {/* ── Centered timeline container ── */}
+      <div className="flex items-start justify-center w-full px-8 pt-8" style={{ height: `calc(100vh - 140px)` }}>
         <div
           ref={trackRef}
           className="relative flex-shrink-0"
           style={{
             width: SVG_W,
             height: SVG_H,
-            minHeight: '660px',
           }}
         >
-        {/* ── SVG sine-wave ── */}
-        <svg
-          width={SVG_W}
-          height={SVG_H}
-          className="absolute inset-0 pointer-events-none"
-          style={{ overflow: "visible" }}
-        >
-          <defs>
-            <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stopColor="#2563eb" stopOpacity="0.3" />
-              <stop offset="50%"  stopColor="#7c3aed" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#0891b2" stopOpacity="0.3" />
-            </linearGradient>
-          </defs>
-
-          {/* Background wave (faint, always visible) */}
-          <path
-            d={WAVE_PATH}
-            fill="none"
-            stroke="url(#waveGrad)"
-            strokeWidth="2"
-            opacity="0.25"
+          {/* ── Horizontal Timeline Line ── */}
+          <div
+            className="timeline-line absolute bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400"
+            style={{
+              left: 0,
+              top: TIMELINE_Y,
+              width: '100%',
+              height: '4px',
+              transformOrigin: 'left center',
+            }}
           />
 
-          {/* Animated draw wave */}
-          <path
-            ref={pathRef}
-            d={WAVE_PATH}
-            fill="none"
-            stroke="url(#waveGrad)"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* ── Education cards ── */}
-        {educationData.map((item, i) => (
-          <div key={item.id}>
-            {/* Dot on wave */}
-            <div
-              className="edu-dot absolute z-20"
-              style={{
-                left: dotX(i) - 10,
-                top:  dotY(i) - 10,
-                opacity: 0,
-              }}
-            >
+          {/* ── Checkpoints and Cards ── */}
+          {educationData.map((item, i) => (
+            <div key={item.id}>
+              {/* Checkpoint Circle */}
               <div
-                className="w-5 h-5 rounded-full border-4 border-white shadow-md"
-                style={{ background: item.color, boxShadow: `0 0 12px ${item.color}88` }}
-              />
-            </div>
-
-            {/* Connector line from dot to card */}
-            <svg
-              className="absolute pointer-events-none"
-              style={{ left: dotX(i) - 1, top: Math.min(dotY(i), cardY(i) + 90), overflow: "visible" }}
-              width="2"
-              height={Math.abs(dotY(i) - (cardY(i) + 90))}
-            >
-              <line
-                x1="1" y1="0"
-                x2="1" y2={Math.abs(dotY(i) - (cardY(i) + 90))}
-                stroke={item.color}
-                strokeWidth="1.5"
-                strokeDasharray="4 3"
-                opacity="0.5"
-              />
-            </svg>
-
-            {/* Card */}
-            <div
-              className="edu-card absolute z-10"
-              style={{
-                left:  dotX(i) - 160,
-                top:   cardY(i),
-                width: 320,
-                opacity: 0,
-              }}
-            >
-              <div
-                className="bg-white rounded-2xl p-5 shadow-sm border"
-                style={{ borderColor: `${item.color}30` }}
+                className="edu-checkpoint absolute z-20"
+                style={{
+                  left: checkpointX(i) - 12,
+                  top: TIMELINE_Y - 12,
+                  opacity: 0,
+                }}
               >
-                {/* Period badge */}
-                <span
-                  className="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 border"
-                  style={{
-                    color: item.color,
-                    background: `${item.color}12`,
-                    borderColor: `${item.color}30`,
-                  }}
-                >
-                  {item.period}
-                </span>
-
-                <h3 className="text-base font-black text-slate-900 mb-1 leading-snug">
-                  {item.title}
-                </h3>
-                <h4 className="text-slate-500 text-xs font-medium mb-3">
-                  {item.institution}
-                </h4>
-                <p className="text-slate-500 text-xs leading-relaxed mb-3">
-                  {item.description}
-                </p>
                 <div
-                  className="text-xs font-bold italic border-t pt-2.5"
-                  style={{ color: item.color, borderColor: `${item.color}20` }}
+                  className="w-6 h-6 rounded-full border-4 border-white shadow-lg"
+                  style={{ 
+                    background: item.color, 
+                    boxShadow: `0 0 0 3px ${item.color}40, 0 4px 12px ${item.color}60` 
+                  }}
+                />
+              </div>
+
+              {/* Vertical Connector Line */}
+              <div
+                className="absolute"
+                style={{
+                  left: checkpointX(i) - 1,
+                  top: TIMELINE_Y + 6,
+                  width: '2px',
+                  height: CARD_TOP_MARGIN - 6,
+                  background: `linear-gradient(to bottom, ${item.color}, ${item.color}40)`,
+                  opacity: 0.4,
+                }}
+              />
+
+              {/* Card */}
+              <div
+                className="edu-card absolute z-10"
+                style={{
+                  left: cardX(i),
+                  top: cardY,
+                  width: CARD_WIDTH,
+                  opacity: 0,
+                }}
+              >
+                <div
+                  className="bg-white rounded-2xl p-5 shadow-lg border-2 hover:shadow-xl transition-shadow duration-300"
+                  style={{ borderColor: `${item.color}30` }}
                 >
-                  {item.score}
+                  {/* Period badge */}
+                  <span
+                    className="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3 border"
+                    style={{
+                      color: item.color,
+                      background: `${item.color}12`,
+                      borderColor: `${item.color}30`,
+                    }}
+                  >
+                    {item.period}
+                  </span>
+
+                  <h3 className="text-base font-black text-slate-900 mb-1 leading-snug">
+                    {item.title}
+                  </h3>
+                  <h4 className="text-slate-500 text-xs font-medium mb-3">
+                    {item.institution}
+                  </h4>
+                  <p className="text-slate-500 text-xs leading-relaxed mb-3">
+                    {item.description}
+                  </p>
+                  <div
+                    className="text-xs font-bold italic border-t pt-2.5"
+                    style={{ color: item.color, borderColor: `${item.color}20` }}
+                  >
+                    {item.score}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
       </div>
     </div>

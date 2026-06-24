@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { Briefcase, FileCode2, Landmark, LineChart, ShieldAlert } from "lucide-react";
+import { Briefcase, FileCode2, Landmark, LineChart } from "lucide-react";
 
 const experienceData = [
   {
@@ -95,7 +95,7 @@ export default function Experience() {
 
       {/* Timeline Wrapper */}
       <div className="relative max-w-6xl mx-auto">
-        {/* Central Vertical Line (hidden on very small screens, centered on md+) */}
+        {/* Central Vertical Line */}
         <div className="absolute left-[19px] md:left-1/2 md:-translate-x-1/2 top-2 bottom-2 w-1 bg-slate-200 rounded-full">
           <div className="absolute top-0 bottom-0 left-0 right-0 bg-gradient-to-b from-blue-600 via-purple-600 to-amber-500 rounded-full opacity-60" />
         </div>
@@ -109,7 +109,7 @@ export default function Experience() {
                 key={item.id} 
                 className="relative flex flex-col md:flex-row items-stretch w-full"
               >
-                {/* Left side spacing for desktop / Right side cards */}
+                {/* Card Content */}
                 <div className={`w-full md:w-1/2 flex ${isEven ? 'md:justify-end' : 'md:justify-start md:order-2'} pl-16 md:pl-0 md:px-8`}>
                   <motion.div
                     initial={{ opacity: 0, x: isEven ? -50 : 50 }}
@@ -119,7 +119,7 @@ export default function Experience() {
                     className="w-full max-w-lg bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 relative group"
                     style={{ borderLeftWidth: `6px`, borderLeftColor: item.color }}
                   >
-                    {/* Tiny type badge */}
+                    {/* Type badge */}
                     <span 
                       className="inline-block text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 border"
                       style={{
@@ -160,7 +160,7 @@ export default function Experience() {
                   </motion.div>
                 </div>
 
-                {/* Timeline Icon Node (Middle of desktop, Left of mobile) */}
+                {/* Timeline Icon Node */}
                 <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 top-4 z-10 flex items-center justify-center">
                   <motion.div
                     initial={{ scale: 0 }}
@@ -177,7 +177,7 @@ export default function Experience() {
                   </motion.div>
                 </div>
 
-                {/* Empty side space matching design logic for layout alignment */}
+                {/* Empty side space for layout alignment */}
                 <div className="hidden md:block w-1/2" />
               </div>
             );
