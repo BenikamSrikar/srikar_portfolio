@@ -87,9 +87,9 @@ export default function Experience() {
     <section 
       id="experience" 
       ref={containerRef}
-      className="w-full min-h-screen bg-slate-50 text-slate-800 py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-20 relative overflow-hidden md:bg-gradient-to-b md:from-black md:to-[#191970]"
+      className="w-full min-h-screen text-slate-800 py-16 sm:py-24 px-4 sm:px-6 md:px-10 lg:px-20 relative overflow-hidden bg-slate-50 md:bg-gradient-to-b md:from-black md:via-[#191970] md:to-white"
     >
-      {/* Mobile/Tablet background layout accents (Left untouched) */}
+      {/* Mobile/Tablet background layout accents */}
       <div className="absolute top-1/4 left-0 w-80 h-80 bg-blue-100/30 blur-[100px] rounded-full pointer-events-none md:hidden" />
       <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-purple-100/30 blur-[100px] rounded-full pointer-events-none md:hidden" />
 
@@ -118,18 +118,14 @@ export default function Experience() {
         </p>
       </motion.div>
 
-      {/* ========================================================================= */}
-      {/* 1. DESKTOP VIEW: SCROLL-TRIGGERED CURVED TIMELINE PATH                    */}
-      {/* ========================================================================= */}
+      {/* Desktop View: Curved Timeline */}
       <div className="hidden md:block relative max-w-5xl mx-auto min-h-[1400px] z-10">
-        
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none z-0" 
           viewBox="0 0 1000 1400" 
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Faded Background Path Track */}
           <path 
             d="M 500 0 C 750 250, 800 350, 500 550 C 200 750, 150 850, 500 1050 C 750 1200, 700 1300, 500 1400" 
             fill="none" 
@@ -137,7 +133,6 @@ export default function Experience() {
             strokeWidth="16" 
             strokeLinecap="round"
           />
-          {/* Active Glowing Scroll-Triggered Path */}
           <motion.path 
             d="M 500 0 C 750 250, 800 350, 500 550 C 200 750, 150 850, 500 1050 C 750 1200, 700 1300, 500 1400" 
             fill="none" 
@@ -216,9 +211,7 @@ export default function Experience() {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. MOBILE & TABLET VIEW: STRAIGHT TIMELINE (Completely Untouched)           */}
-      {/* ========================================================================= */}
+      {/* Mobile & Tablet View: Straight Timeline */}
       <div className="block md:hidden relative max-w-6xl mx-auto">
         <div className="absolute left-[19px] top-2 bottom-2 w-1 bg-slate-200 rounded-full">
           <div className="absolute top-0 bottom-0 left-0 right-0 bg-gradient-to-b from-blue-600 via-purple-600 to-amber-500 rounded-full opacity-60" />
