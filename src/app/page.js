@@ -30,9 +30,9 @@ export default function Home() {
         <Navbar />
         <HomePage startAnimation={startAnims} />
         <About />
-        <Skills />
         <Education />
         <Experience />
+        <Skills />
         <Projects />
         <ExperienceAndActivities />
         <Footer />

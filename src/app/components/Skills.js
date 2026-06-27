@@ -685,7 +685,7 @@ export default function Skills() {
                 <div
                   className="rounded-2xl p-4 md:p-5"
                   style={{
-                    background: 'rgba(255,255,255,0.74)',
+                    background: 'rgba(255, 255, 255, 1)',
                     backdropFilter: 'blur(12px)',
                     border: '1.5px solid #a7f3d0',
                     boxShadow: '0 2px 12px rgba(16,185,129,0.25)',
@@ -725,7 +725,7 @@ export default function Skills() {
               <div
                 ref={creativeSkillsBottomBarRef}
                 className="mt-auto px-6 py-2.5 flex items-center justify-center border-t border-blue-200/60"
-                style={{ background: 'rgba(255,255,255,0.4)', opacity: 0 }}
+                style={{ background: 'rgba(255, 255, 255, 1)', opacity: 0 }}
               >
                 <span className="text-[10px] font-bold tracking-widest text-blue-300 uppercase">
                   benikam.srikar · creative skill stack reference
