@@ -43,30 +43,30 @@ export default function ModelView({ startAnimation }) {
     renderer.toneMappingExposure = 2; // Boosted exposure slightly for higher dynamic contrast
     container.appendChild(renderer.domElement);
 
-    // ---------------- CINEMATIC SPLIT LIGHTING MATRIX ----------------
-    // Ambient Light: Very subtle dark blue base fill to keep absolute shadows clean
-    const ambientLight = new THREE.AmbientLight(0x0a1128, 0.1); 
+    // ---------------- REALISTIC WHITE LIGHTING MATRIX ----------------
+    // Ambient Light: Soft white base fill for natural shadows
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); 
     scene.add(ambientLight);
 
-    // FRONT LIGHTING (Vibrant Blue Profile)
-    // Primary front-right key light throwing deep blue over the keyboard and inner bezel
-    const frontBlueKey = new THREE.DirectionalLight(0x191970, 0.5);
-    frontBlueKey.position.set(15, 10, 20);
-    scene.add(frontBlueKey);
+    // FRONT LIGHTING (White Key Light)
+    // Primary front-right key light for natural illumination
+    const frontWhiteKey = new THREE.DirectionalLight(0xffffff, 0.8);
+    frontWhiteKey.position.set(15, 10, 20);
+    scene.add(frontWhiteKey);
 
-    // Dedicated point light hovering directly above the keyboard to enhance the glow effect on keys
-    const keyboardBlueGlow = new THREE.PointLight(0x00d2ff, 18, 90);
-    keyboardBlueGlow.position.set(0, 2, 12);
-    scene.add(keyboardBlueGlow);
+    // Dedicated point light hovering directly above the keyboard for realistic key illumination
+    const keyboardWhiteGlow = new THREE.PointLight(0xffffff, 12, 90);
+    keyboardWhiteGlow.position.set(0, 2, 12);
+    scene.add(keyboardWhiteGlow);
 
-    // BACK LIGHTING (Crisp White Backlight Profile)
-    // Strong rim light behind the model to illuminate the Apple logo and lid edges when closed/opening
-    const backWhiteRim = new THREE.DirectionalLight(0xFFD700, 0.5);
+    // BACK LIGHTING (White Rim Light)
+    // Strong rim light behind the model to illuminate the Apple logo and lid edges
+    const backWhiteRim = new THREE.DirectionalLight(0xffffff, 0.6);
     backWhiteRim.position.set(-15, 15, -25);
     scene.add(backWhiteRim);
 
     // Secondary soft fill from the upper left back to catch the curvature of the outer shell
-    const backLeftFill = new THREE.DirectionalLight(0x0077ff, 1);
+    const backLeftFill = new THREE.DirectionalLight(0xffffff, 0.5);
     backLeftFill.position.set(-25, 20, -10);
     scene.add(backLeftFill);
 

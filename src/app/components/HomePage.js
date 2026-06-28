@@ -12,7 +12,7 @@ export default function HomePage({ startAnimation }) {
   };
 
   return (
-    <section className="relative w-full h-screen flex flex-col xl:flex-row items-center justify-center xl:justify-between px-6 sm:px-12 md:px-20 bg-[#030712] overflow-hidden">
+    <section className="relative w-full h-screen flex flex-col xl:flex-row items-center justify-center xl:justify-between px-6 sm:px-12 md:px-20 bg-white overflow-hidden">
       
       {/* ========================================================= */}
       {/* CORE KEYFRAMES FOR ANIMATIONS                             */}
@@ -35,27 +35,6 @@ export default function HomePage({ startAnimation }) {
           10% { opacity: 1; }
           90% { opacity: 0.5; }
           100% { transform: translateY(-90vh) scale(0.3); opacity: 0; }
-        }
-        /* Continuous Border Glow Rotation */
-        @keyframes rotateGlow {
-          0% { border-color: rgb(59, 130, 246) transparent transparent transparent; box-shadow: 0 -4px 10px -2px rgba(59, 130, 246, 0.5); }
-          25% { border-color: transparent rgb(59, 130, 246) transparent transparent; box-shadow: 4px 0 10px -2px rgba(59, 130, 246, 0.5); }
-          50% { border-color: transparent transparent rgb(59, 130, 246) transparent; box-shadow: 0 4px 10px -2px rgba(59, 130, 246, 0.5); }
-          75% { border-color: transparent transparent transparent rgb(59, 130, 246); box-shadow: -4px 0 10px -2px rgba(59, 130, 246, 0.5); }
-          100% { border-color: rgb(59, 130, 246) transparent transparent transparent; box-shadow: 0 -4px 10px -2px rgba(59, 130, 246, 0.5); }
-        }
-        @keyframes rotateOrangeGlow {
-          0% { border-color: rgb(249, 115, 22) transparent transparent transparent; box-shadow: 0 -4px 10px -2px rgba(249, 115, 22, 0.5); }
-          25% { border-color: transparent rgb(249, 115, 22) transparent transparent; box-shadow: 4px 0 10px -2px rgba(249, 115, 22, 0.5); }
-          50% { border-color: transparent transparent rgb(249, 115, 22) transparent; box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.5); }
-          75% { border-color: transparent transparent transparent rgb(249, 115, 22); box-shadow: -4px 0 10px -2px rgba(249, 115, 22, 0.5); }
-          100% { border-color: rgb(249, 115, 22) transparent transparent transparent; box-shadow: 0 -4px 10px -2px rgba(249, 115, 22, 0.5); }
-        }
-        .glow-loop-blue {
-          animation: rotateGlow 3s linear infinite;
-        }
-        .glow-loop-orange {
-          animation: rotateOrangeGlow 3s linear infinite;
         }
       `}</style>
 
@@ -121,27 +100,27 @@ export default function HomePage({ startAnimation }) {
           startAnimation ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
         }`}
       >
-        <span className="text-gray-400 font-mono text-xs sm:text-sm tracking-wider uppercase mb-2">
+        <span className="text-gray-600 font-mono text-xs sm:text-sm tracking-wider uppercase mb-2">
           Welcome to my portfolio
         </span>
-        <h1 className="text-4xl sm:text-5xl xl:text-7xl font-extrabold text-white tracking-tight leading-none mb-4">
+        <h1 className="text-4xl sm:text-5xl xl:text-7xl font-extrabold text-black tracking-tight leading-none mb-4">
           Hi, I'm a <br className="hidden xl:block" />
-          <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             UnderGrad Student
           </span>
         </h1>
-        <p className="text-gray-300 text-sm sm:text-base xl:text-lg max-w-sm sm:max-w-md mb-8 leading-relaxed px-4 xl:px-0">
+        <p className="text-gray-700 text-sm sm:text-base xl:text-lg max-w-sm sm:max-w-md mb-8 leading-relaxed px-4 xl:px-0">
           I specialize in designing scalable backend architectures, REST APIs, and real-time applications. 
           My focus involves event-driven systems, WebRTC communication, and AI-integrated solutions.
         </p>
         
-        {/* Buttons: Transparent baseline background, loop-animated glowing shadow borders, hover shifts */}
+        {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-4 w-full sm:w-auto px-6 sm:px-0">
           
           {/* Explore Button */}
           <button 
             onClick={handleExploreClick}
-            className="glow-loop-blue w-full sm:w-auto text-center px-6 py-3 rounded-full bg-transparent border text-blue-400 font-medium transition-all duration-300 hover:bg-blue-600 hover:text-white hover:shadow-[0_0_20px_rgba(59,130,246,0.8)]"
+            className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-blue-600 text-white font-medium transition-all duration-300 hover:bg-blue-700"
           >
             Explore
           </button>
@@ -150,7 +129,7 @@ export default function HomePage({ startAnimation }) {
           <a 
             href="/resume/srikar_resume.pdf" 
             download="srikar_resume.pdf"
-            className="glow-loop-orange w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-transparent border text-orange-400 font-medium transition-all duration-300 hover:bg-orange-500 hover:text-white hover:shadow-[0_0_20px_rgba(249,115,22,0.8)]"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-white font-medium transition-all duration-300 hover:bg-orange-600"
           >
             Download Resume
             <svg 

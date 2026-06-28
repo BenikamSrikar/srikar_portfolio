@@ -5,11 +5,11 @@ import HomePage from "./components/HomePage";
 import About from "./components/About";
 import Skills from "./components/Skills";
 import Education from "./components/Education";
-import Experience from "./components/Experience";
 import Projects from "./components/Projects";
 import ExperienceAndActivities from "./components/ExperienceAndActivities";
 import Footer from "./components/Footer";
 import PageLoader from "./components/PageLoader";
+import Experience from "./components/Experience";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +31,7 @@ export default function Home() {
         <HomePage startAnimation={startAnims} />
         <About />
         <Education />
-        <Experience />
+        <Experience startAnimation={startAnims} />
         <Skills />
         <Projects />
         <ExperienceAndActivities />
