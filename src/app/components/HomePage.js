@@ -1,165 +1,131 @@
-"use client";
+﻿"use client";
+import { useEffect, useState, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Github, Linkedin, ExternalLink, Download } from "lucide-react";
 import ModelView from "./ModelView";
 
 export default function HomePage({ startAnimation }) {
-  
-  // Function to handle smooth scrolling to the About section
-  const handleExploreClick = () => {
-    const aboutSection = document.getElementById("about");
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const [index, setIndex] = useState(0);
+  const [article, setArticle] = useState("a");
+  const prevArticleRef = useRef("a");
+
+  const skills = [
+    { title: "Frontend Developer", article: "a", desc: "Crafting responsive and accessible interfaces.", icon: "🎨" },
+    { title: "Frontend QA Engineer", article: "a", desc: "Ensuring pixel-perfect and bug-free experiences.", icon: "🧪" },
+    { title: "UI/UX Designer", article: "a", desc: "Focusing on user-centric design and interactions.", icon: "🖋️" },
+    { title: "Systems Engineer", article: "a", desc: "Optimizing low-level system performance.", icon: "⚙️" },
+    { title: "Machine Learning Engineer", article: "an", desc: "Developing scalable AI and ML pipelines.", icon: "🤖" },
+    { title: "Network App Developer", article: "a", desc: "Building robust high-performance network protocols.", icon: "🌐" },
+    { title: "Distributed Systems Eng", article: "a", desc: "Architecting resilient and scalable clusters.", icon: "☁️" },
+    { title: "Full-stack Developer", article: "a", desc: "Building end-to-end web applications.", icon: "💻" },
+    { title: "Blockchain Enthusiast", article: "a", desc: "Exploring decentralized cryptographic systems.", icon: "⛓️" },
+    { title: "AI Engineer", article: "an", desc: "Designing intelligent autonomous agents.", icon: "🧠" },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => {
+        const nextIndex = (prev + 1) % skills.length;
+        const nextArticle = skills[nextIndex].article;
+        if (nextArticle !== prevArticleRef.current) {
+          setArticle(nextArticle);
+          prevArticleRef.current = nextArticle;
+        }
+        return nextIndex;
+      });
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <section className="relative w-full h-screen flex flex-col xl:flex-row items-center justify-center xl:justify-between px-6 sm:px-12 md:px-20 bg-white overflow-hidden">
-      
-      {/* ========================================================= */}
-      {/* CORE KEYFRAMES FOR ANIMATIONS                             */}
-      {/* ========================================================= */}
-      <style>{`
-        @keyframes driftNode1 {
-          0%, 100% { transform: translate(0px, 0px); }
-          50% { transform: translate(40px, -25px); }
-        }
-        @keyframes driftNode2 {
-          0%, 100% { transform: translate(0px, 0px); }
-          50% { transform: translate(-50px, 35px); }
-        }
-        @keyframes driftNode3 {
-          0%, 100% { transform: translate(0px, 0px); }
-          50% { transform: translate(30px, 45px); }
-        }
-        @keyframes safeEvaporate {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 0.5; }
-          100% { transform: translateY(-90vh) scale(0.3); opacity: 0; }
-        }
-      `}</style>
-
-      {/* ========================================================= */}
-      {/* TABLET / IPAD PRO VIEW: Moving, Connecting Wiggle Dots   */}
-      {/* ========================================================= */}
-      <div className="hidden sm:block xl:hidden absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <svg className="w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="blue-glow-tablet" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" result="blur"/>
-              <feMerge>
-                <feMergeNode in="blur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          <g style={{ animation: 'driftNode1 10s infinite ease-in-out' }}>
-            <line x1="20%" y1="25%" x2="45%" y2="20%" stroke="white" strokeWidth="0.75" strokeDasharray="4 2" opacity="0.4" />
-            <line x1="45%" y1="20%" x2="35%" y2="45%" stroke="white" strokeWidth="0.75" opacity="0.5" />
-            <circle cx="20%" cy="25%" r="6" fill="#3b82f6" filter="url(#blue-glow-tablet)" />
-            <circle cx="45%" cy="20%" r="5" fill="#22d3ee" filter="url(#blue-glow-tablet)" />
-            <circle cx="35%" cy="45%" r="7" fill="#60a5fa" filter="url(#blue-glow-tablet)" />
-          </g>
-
-          <g style={{ animation: 'driftNode2 14s infinite ease-in-out' }}>
-            <line x1="75%" y1="65%" x2="55%" y2="80%" stroke="white" strokeWidth="0.75" opacity="0.4" />
-            <line x1="55%" y1="80%" x2="85%" y2="85%" stroke="white" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.6" />
-            <circle cx="75%" cy="65%" r="5" fill="#60a5fa" filter="url(#blue-glow-tablet)" />
-            <circle cx="55%" cy="80%" r="7" fill="#3b82f6" filter="url(#blue-glow-tablet)" />
-            <circle cx="85%" cy="85%" r="4" fill="#22d3ee" filter="url(#blue-glow-tablet)" />
-          </g>
-
-          <g style={{ animation: 'driftNode3 12s infinite ease-in-out' }}>
-            <line x1="80%" y1="20%" x2="70%" y2="40%" stroke="white" strokeWidth="0.75" opacity="0.5" />
-            <circle cx="80%" cy="20%" r="6" fill="#22d3ee" filter="url(#blue-glow-tablet)" />
-            <circle cx="70%" cy="40%" r="5" fill="#3b82f6" filter="url(#blue-glow-tablet)" />
-          </g>
-        </svg>
-      </div>
-
-      {/* ========================================================= */}
-      {/* MOBILE VIEW BACKGROUND: Evaporating Particles             */}
-      {/* ========================================================= */}
-      <div className="block sm:hidden absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-80 h-80 bg-blue-600/20 rounded-full blur-[90px]"></div>
+    <section className="relative w-full min-h-screen flex items-center bg-orange-600/[0.03] overflow-hidden">
+      {/* Container forced to flex row on large screens to keep ModelView on the right */}
+      <div className="w-full max-w-[1600px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-8 px-6 sm:px-12 py-10 z-10">
         
-        <div className="absolute inset-0 opacity-70">
-          <span className="absolute bottom-[-10px] left-[10%] w-2 h-2 bg-cyan-400 rounded-full blur-[1px]" style={{ animation: 'safeEvaporate 6s infinite linear' }}></span>
-          <span className="absolute bottom-[-10px] left-[30%] w-1.5 h-1.5 bg-blue-400 rounded-full blur-[1px]" style={{ animation: 'safeEvaporate 8s infinite linear 1.5s' }}></span>
-          <span className="absolute bottom-[-10px] left-[50%] w-2.5 h-2.5 bg-cyan-300 rounded-full blur-[1px]" style={{ animation: 'safeEvaporate 7s infinite linear 3s' }}></span>
-          <span className="absolute bottom-[-10px] left-[75%] w-2 h-2 bg-blue-500 rounded-full blur-[1px]" style={{ animation: 'safeEvaporate 9s infinite linear 4.5s' }}></span>
-          <span className="absolute bottom-[-10px] left-[90%] w-1.5 h-1.5 bg-cyan-400 rounded-full blur-[1px]" style={{ animation: 'safeEvaporate 5s infinite linear 2s' }}></span>
+        {/* Content Column */}
+        <div className="flex-1 flex flex-col items-start font-jetbrains-mono w-full xl:max-w-xl">
+          <h1 className="text-4xl sm:text-6xl font-bold mb-8 leading-tight">
+            Hi, I&apos;m <AnimatePresence mode="wait">
+              <motion.span 
+                key={article}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="text-orange-600 lowercase"
+              >
+                {article}
+              </motion.span>
+            </AnimatePresence>
+          </h1>
+
+          <div className="w-full bg-[#FFF9F5] border border-orange-200/50 rounded-2xl shadow-xl overflow-hidden mb-6">
+            <div className="px-4 py-3 border-b border-orange-200/30 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+              </div>
+              <div className="ml-2 text-[10px] uppercase font-bold text-orange-800/40 tracking-wider">Srikar_Expertise_Feed.app</div>
+            </div>
+
+            <div className="relative h-[130px] px-6 overflow-hidden">
+              <AnimatePresence mode="popLayout">
+                <motion.div
+                  key={index}
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -50, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 250, damping: 25 }}
+                  className="absolute inset-x-6 py-6 flex gap-4 items-center"
+                >
+                  <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-white border border-orange-100 flex items-center justify-center text-xl shadow-sm">
+                    {skills[index].icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 text-lg">{skills[index].title}</h3>
+                    <p className="text-sm text-slate-600 leading-tight mt-0.5">{skills[index].desc}</p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <p className="text-gray-700 text-sm max-w-xl mb-8 leading-relaxed">
+            Designing scalable backend architectures, REST APIs, and AI-integrated solutions.
+            <br />
+            Building resilient software systems with real-time workflows and smooth user experiences.
+          </p>
+
+          <div className="flex flex-col gap-6 w-full">
+            <div className="flex flex-wrap items-center gap-4">
+                <motion.a href="#projects" className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border-2 border-black bg-white text-black font-semibold px-6 py-3 transition-all duration-300">
+                <span className="absolute inset-x-0 bottom-0 h-0 bg-orange-600 transition-all duration-300 ease-out group-hover:h-full" />
+                <ExternalLink size={18} className="relative z-10 group-hover:text-white" />
+                <span className="relative z-10 transition-colors duration-300 ease-out group-hover:text-white">View Projects</span>
+                </motion.a>
+                <motion.a href="/resume/srikar_resume.pdf" download className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border-2 border-black bg-black text-white font-semibold px-6 py-3 transition-all duration-300">
+                <span className="absolute inset-x-0 bottom-0 h-0 bg-orange-600 transition-all duration-300 ease-out group-hover:h-full" />
+                <Download size={18} className="relative z-10" />
+                <span className="relative z-10 transition-colors duration-300 ease-out">Download Resume</span>
+                </motion.a>
+            </div>
+            <div className="flex gap-4">
+                <a href="https://github.com/BenikamSrikar" target="_blank" className="p-3 bg-black text-white rounded-full hover:bg-orange-600 transition-colors">
+                    <Github size={20} />
+                </a>
+                <a href="https://www.linkedin.com/in/benikam-srikar-81987429b/" target="_blank" className="p-3 bg-[#0A66C2] text-white rounded-full hover:bg-orange-600 transition-colors">
+                    <Linkedin size={20} />
+                </a>
+            </div>
+          </div>
+        </div>
+
+        {/* ModelView Column - Forced to stay on right on large screens */}
+        <div className="w-full xl:w-[60%] h-[400px] xl:h-[700px] flex items-center justify-center">
+          <ModelView startAnimation={true} staticMode={false} useVideoTexture={true} />
         </div>
       </div>
-
-      {/* ========================================================= */}
-      {/* CONTENT COLUMN (Centered up to xl, left-aligned on desktop)*/}
-      {/* ========================================================= */}
-      <div 
-        className={`w-full xl:w-1/2 flex flex-col justify-center items-center xl:items-start text-center xl:text-left z-10 transform transition-all duration-1000 ease-out ${
-          startAnimation ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
-        }`}
-      >
-        <span className="text-gray-600 font-mono text-xs sm:text-sm tracking-wider uppercase mb-2">
-          Welcome to my portfolio
-        </span>
-        <h1 className="text-4xl sm:text-5xl xl:text-7xl font-extrabold text-black tracking-tight leading-none mb-4">
-          Hi, I'm a <br className="hidden xl:block" />
-          <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            UnderGrad Student
-          </span>
-        </h1>
-        <p className="text-gray-700 text-sm sm:text-base xl:text-lg max-w-sm sm:max-w-md mb-8 leading-relaxed px-4 xl:px-0">
-          I specialize in designing scalable backend architectures, REST APIs, and real-time applications. 
-          My focus involves event-driven systems, WebRTC communication, and AI-integrated solutions.
-        </p>
-        
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-4 w-full sm:w-auto px-6 sm:px-0">
-          
-          {/* Explore Button */}
-          <button 
-            onClick={handleExploreClick}
-            className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-blue-600 text-white font-medium transition-all duration-300 hover:bg-blue-700"
-          >
-            Explore
-          </button>
-          
-          {/* Download Resume Button */}
-          <a 
-            href="/resume/srikar_resume.pdf" 
-            download="srikar_resume.pdf"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-white font-medium transition-all duration-300 hover:bg-orange-600"
-          >
-            Download Resume
-            <svg 
-              className="w-4 h-4 transition-transform group-hover:translate-y-0.5" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              viewBox="0 0 24 24" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"></path>
-            </svg>
-          </a>
-
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 3D MODEL VIEWPORT (DESKTOP ONLY - Hides on iPad Pro)       */}
-      {/* ========================================================= */}
-      <div 
-        className={`hidden xl:flex w-full xl:w-1/2 h-full items-center justify-center transition-all duration-1000 ease-out delay-300 z-10 ${
-          startAnimation ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
-      > 
-        <div className="w-full h-full min-h-[400px]">
-          <ModelView startAnimation={startAnimation} />
-        </div>
-      </div>
-
     </section>
   );
 }

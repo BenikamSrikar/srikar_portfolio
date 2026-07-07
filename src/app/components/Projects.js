@@ -1,405 +1,213 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Folder, 
-  FileText, 
-  ExternalLink, 
-  Github, 
-  X, 
-  Terminal, 
-  Layers, 
-  Activity, 
-  Zap, 
-  Cpu 
-} from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
-// ── Shared Animation Configs ────────────────────────────────────────────────
-const SPRING = { type: "spring", stiffness: 300, damping: 30 };
-const BACKDROP_ANIM = { opacity: { duration: 0.2 } };
-const MODAL_ANIM = {
-  initial: { scale: 0.95, opacity: 0, y: 20 },
-  animate: { scale: 1, opacity: 1, y: 0, transition: SPRING },
-  exit: { scale: 0.95, opacity: 0, y: 15, transition: { duration: 0.2 } }
-};
-
-// ── Complete Project & Category Dataset ─────────────────────────────────────
-const projectCategories = [
-  {
-    id: "featured",
-    title: "Featured Projects",
-    subtitle: "Enterprise, production-ready, & research initiatives",
-    icon: <Layers className="w-6 h-6 text-blue-500" />,
-    accentColor: "37, 99, 235", // Blue
-    projects: [
-      {
-        id: "jansaarthi",
-        title: "JanSaarthi",
-        subtitle: "Citizen Grievance & Portal Framework",
-        type: "Team Lead",
-        status: "Production",
-        desc: "A scalable public utility management ecosystem designed to bridge communication gaps between regional administrative bodies and local citizens.",
-        tags: ["Next.js", "PostgreSQL", "Prisma", "TailwindCSS"],
-        highlights: [
-          "Architected a secure role-based access management subsystem dealing with multiple operational levels from local operators to nodal monitoring heads.",
-          "Implemented optimized concurrent database indexing strategies ensuring live ticket dispatch latencies stay under ~150ms.",
-          "Designed data visualizers and localized status tracking interfaces to enhance non-technical citizen user adoption."
-        ],
-        liveLink: "#",
-        githubLink: "#"
-      },
-      {
-        id: "library-space",
-        title: "Library Space Utilization System",
-        subtitle: "IoT & Computer Vision Analytics Ecosystem",
-        type: "Research Project",
-        status: "Completed",
-        desc: "An intelligent occupancy tracking engine collecting live physical facility spatial load metrics using vision analysis streams and multi-point microcontrollers.",
-        tags: ["Python", "OpenCV", "Raspberry Pi", "MQTT", "Flask"],
-        highlights: [
-          "Deployed standard edge object localization nodes running optimized inference routines directly on micro-computing peripherals.",
-          "Configured low-overhead state syncing networks over standard MQTT brokers to avoid local network congestion during peak operational hours.",
-          "Generated granular heatmaps and predictive facility load distributions that helped optimize physical zoning arrangements."
-        ],
-        liveLink: "#",
-        githubLink: "#"
-      },
-      {
-        id: "recovery-mate",
-        title: "Recovery Mate",
-        subtitle: "Clinical Physical Rehabilitation Monitor",
-        type: "Collaborative Project",
-        status: "Beta testing",
-        desc: "A cross-platform mobile ecosystem linking biomechanical tracking telemetry with clinical therapy guidance for sports recovery management.",
-        tags: ["React Native", "Node.js", "TensorFlow.js", "Bluetooth LE"],
-        highlights: [
-          "Configured low-latency telemetry acquisition protocols processing multi-axis inertial data streams directly via local hardware integrations.",
-          "Built a local predictive analysis mechanism identifying structural form deviations during home-based therapeutic sessions.",
-          "Integrated compliant cloud encryption pipelines providing secure diagnostics logging and remote practitioner updates."
-        ],
-        liveLink: "#",
-        githubLink: "#"
-      }
+const allProjects = [
+  { 
+    id: "jansaarthi", 
+    title: "JanSaarthi AI", 
+    subtitle: "From Complexity to Clarity", 
+    hoverSubtitle: "AI — From Complexity to Clarity",
+    isFeatured: true,
+    tags: ["NLP", "Centralized Web System", "Language Translation", "Data Pipeline"],
+    techStack: ["HTML", "CSS", "JS", "OpenAI API", "Language Models", "Tailwind CSS"],
+    description: "An AI-driven citizen services platform that automates outreach and grievance resolution by matching users to relevant schemes, generating contextual guidance, and streamlining application workflows. The solution improves accessibility, reduces manual support workload, and accelerates case resolution — enabling organizations to scale assistance, increase beneficiary engagement, and make data-driven policy decisions.",
+    role: "Frontend Quality Assurance Engineer",
+    team: [
+      { name: "Bandi Bhargav Chowdary (Team Leader)", url: "https://bhargavchowdary.netlify.app/" },
+      { name: "Cheerla Shamith", url: "https://shamith.is-a.dev/" },
+      { name: "Benikam Srikar", url: "/" },
+      { name: "Susatwik Mannuri", url: "https://susatwik-portfolio.vercel.app/" }
+    ],
+    bg: "bg-sky-100", 
+    textColor: "text-slate-900", 
+    image: "/images/projects/jansaarthi/official image.png", 
+    github: "https://github.com/BenikamSrikar/JAN-SAARTHI"
+  },
+  { 
+    id: "swift", 
+    title: "SWIFT-Connect", 
+    subtitle: "Indie Project — Secure Files & Folder Transfer Room", 
+    tags: ["Indie Project", "File Transfer", "Peer-to-Peer", "Folder Sync"],
+    techStack: ["React", "Supabase"],
+    description: "SWIFT-Connect is a secure files-and-folders transfer app inspired by Apple AirDrop. It uses a host-participant room model with Google account identification, supports upload/download transfer modes, preserves full folder directory structure, and stores only transfer metadata and logs for history — never the actual files.",
+    role: "Indie Project Creator",
+    bg: "bg-sky-100", 
+    textColor: "text-slate-900", 
+    image: "/images/projects/jansaarthi/hello.png", 
+    github: "#", 
+    live: "#" 
+  },
+  { 
+    id: "library-space", 
+    title: "SmartSpace-AI-Space-Utilization-System",
+    subtitle: "Digital Twin — Smart City Library Prototype", 
+    isFeatured: true,
+    tags: ["Digital Twin", "Smart City", "Prototype"],
+    techStack: ["Figma", "Adobe XD", "HTML", "CSS", "React"],
+    description: "A prototype digital twin for library space management that turns occupancy data into actionable insights — enabling dynamic desk allocation, peak-hour planning, and efficient resource scheduling. The system demonstrates how predictive utilization maps and zone-level analytics can improve study-area availability, reduce energy and staffing costs, and inform longer-term infrastructure planning.",
+    role: "UI/UX Designer — Frontend design (prototype mockups & layout)",
+    bg: "bg-zinc-900", 
+    textColor: "text-white", 
+    image: "/images/projects/library space/001.png", 
+    github: "https://github.com/cheerlashamith/SmartSpace-AI-Space-Utilization-System", 
+    live: "#",
+    team: [
+      { name: "Bandi Bhargav Chowdary (Team Leader)", url: "https://bhargavchowdary.netlify.app/" },
+      { name: "Cheerla Shamith", url: "https://shamith.is-a.dev/" },
+      { name: "Benikam Srikar", url: "/" }
     ]
   },
-  {
-    id: "indie",
-    title: "Indie Projects",
-    subtitle: "Custom network software & performance deep-dives",
-    icon: <Terminal className="w-6 h-6 text-amber-500" />,
-    accentColor: "217, 119, 6", // Amber
-    projects: [
-      {
-        id: "swift",
-        title: "SWIFT",
-        subtitle: "Secure Wideband Instant File Transfer",
-        type: "Solo Project",
-        status: "Live",
-        desc: "Real-time file transfer platform with zero persistent storage, live upload-download model, and integrated real-time chat.",
-        tags: ["WebRTC", "Socket.IO", "Node.js", "React", "OAuth 2.0"],
-        highlights: [
-          "Architected a zero-storage file transfer system where transfers happen live between sender and receiver simultaneously — avoiding standard cloud-side file logging mechanics entirely.",
-          "Improved transmission resilience by ~40% and reduced session handshake times by ~30% via a tailored multi-candidate signaling workflow.",
-          "Integrated live concurrent chat environments enabling contextual room synchronization without caching transactional state databases."
-        ],
-        liveLink: "https://swift-file-transfer.vercel.app",
-        githubLink: "https://github.com/benikam/swift-file-transfer"
-      },
-      {
-        id: "veda",
-        title: "VEDA",
-        subtitle: "Visual Enhancement & Denoising Assistant",
-        type: "Research Engine",
-        status: "In Progress",
-        desc: "AI-assisted post-processing system for rendering environments utilizing deep neural pipelines to reduce complex noise distributions asynchronously.",
-        tags: ["Python", "PyTorch", "Blender API", "NAFNet", "Real-ESRGAN"],
-        highlights: [
-          "Built an external asynchronous asset daemon hooking file monitoring mechanisms without blocking host application processing main loops.",
-          "Integrated NAFNet and specialized super-resolution architectures to clear complex volumetric grains while shielding native geometry values.",
-          "Created modular resolution configuration algorithms automatically setting targeted dimensions matching historical cinematic aspect ratios."
-        ],
-        liveLink: null,
-        githubLink: "https://github.com/benikam/veda-ai-enhancement"
-      }
-    ]
-  }
+  { 
+    id: "recover-mate", 
+    title: "Recover Mate", 
+    subtitle: "AI Invoice Recovery Dashboard System", 
+    isFeatured: true,
+    tags: ["AI", "Messaging Automation", "Twilio", "Invoice Recovery", "Kanban"],
+    techStack: ["React", "NodeJS", "Twilio", "Language Models"],
+    description: "Recover Mate is an AI-driven invoice recovery assistant that converts Promising, Unpaid, and Paid statuses into actionable outreach. It uses Twilio-powered messaging and automated call workflows backed by language models to follow up with clients, accelerate collections, and reduce manual recovery effort.",
+    role: "Quality Assurance Tester",
+    team: [
+      { name: "Susatwik Mannuri (Team Lead and Application Developer)", url: "https://github.com/susatwik" },
+      { name: "Benikam Srikar", url: "/" }
+    ],
+    bg: "bg-sky-100", 
+    textColor: "text-slate-900", 
+    image: "/images/projects/recoverymate/001.png", 
+    github: "https://github.com/susatwik/RecoverMate", 
+    live: "#" 
+  },
 ];
 
-export default function Projects() {
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
-
-  // Set the first project active whenever a category modal opens
-  const handleOpenCategory = (category) => {
-    setActiveCategory(category);
-    setSelectedProject(category.projects[0]);
+const TextReveal = ({ text }) => {
+  const letters = text.split("");
+  const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+  const child = {
+    visible: { opacity: 1, rotateX: 0, y: 0, transition: { type: "spring", stiffness: 120, damping: 10 } },
+    hidden: { opacity: 0, rotateX: -90, y: 10 }
   };
+  return (
+    <motion.div style={{ display: "flex", perspective: "500px" }} variants={container} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+      {letters.map((letter, i) => (
+        <motion.span variants={child} key={i} style={{ display: "inline-block" }}>{letter === " " ? "\u00A0" : letter}</motion.span>
+      ))}
+    </motion.div>
+  );
+};
 
-  // Prevent background scrolling when modal window is open
+function TagCarousel({ tags }) {
+  const controls = useAnimation();
+  const [paused, setPaused] = useState(false);
+  const containerRef = useRef(null);
+  const measureRef = useRef(null);
+  const [repeatCount, setRepeatCount] = useState(1);
+
   useEffect(() => {
-    if (activeCategory) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => { document.body.style.overflow = "unset"; };
-  }, [activeCategory]);
+    const updateRepeatCount = () => {
+      const containerWidth = containerRef.current?.clientWidth ?? 0;
+      const contentWidth = measureRef.current?.scrollWidth ?? 0;
+      if (!containerWidth || !contentWidth) return;
+      const count = Math.max(1, Math.ceil(containerWidth / contentWidth));
+      setRepeatCount(count);
+    };
+    updateRepeatCount();
+    window.addEventListener("resize", updateRepeatCount);
+    return () => window.removeEventListener("resize", updateRepeatCount);
+  }, [tags]);
+
+  useEffect(() => {
+    if (paused) { controls.stop(); return; }
+    controls.start({ x: ["0%", "-50%"], transition: { duration: 14, ease: "linear", repeat: Infinity } });
+  }, [paused, controls]);
+
+  const repeatedTags = Array.from({ length: repeatCount }, () => tags).flat();
+  return (
+    <div ref={containerRef} className="relative w-full overflow-hidden" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div ref={measureRef} className="pointer-events-none absolute left-0 top-0 opacity-0 whitespace-nowrap flex items-center gap-2">
+        {tags.map((tag, idx) => <span key={`${tag}-measure-${idx}`} className="text-[10px] md:text-[11px] font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800">{tag}</span>)}
+      </div>
+      <motion.div animate={controls} className="flex min-w-[200%] items-center gap-2 whitespace-nowrap">
+        {[...repeatedTags, ...repeatedTags].map((tag, idx) => (
+          <span key={`${tag}-${idx}`} className="text-[10px] md:text-[11px] font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800">{tag}</span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+export default function Projects() {
+  const [expandedCard, setExpandedCard] = useState(null);
+  const sectionRef = useRef(null);
+
+  const toggleExpand = (id) => setExpandedCard(expandedCard === id ? null : id);
 
   return (
-    <div id="projects" className="px-4 sm:px-6 md:px-10 pt-20 pb-32 flex flex-col items-center bg-slate-50/50 min-h-screen font-sans">
-      
-      {/* ── Section Header ────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 uppercase italic">
-          <span className="text-blue-600">My</span> Portfolio
-        </h2>
-        <p className="text-sm text-slate-500 mt-2">Select a workspace folder to inspect files</p>
-      </motion.div>
-
-      {/* ── Dashboard Grid ────────────────────────────────────────────────── */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-        {projectCategories.map((cat) => {
-          const ac = cat.accentColor;
-          return (
-            <motion.div
-              key={cat.id}
-              whileHover={{ y: -4, scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => handleOpenCategory(cat)}
-              className="group cursor-pointer rounded-3xl p-8 bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
-              style={{
-                borderColor: `rgba(${cat.accentColor}, 0.1)`,
-              }}
-            >
-              {/* Subtle background glow element */}
-              <div 
-                className="absolute -right-12 -top-12 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-300"
-                style={{ background: `rgb(${ac})` }}
-              />
-
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
-                    {cat.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-xl text-slate-800 tracking-tight">{cat.title}</h3>
-                    <p className="text-xs text-slate-400 font-medium">{cat.projects.length} Files inside</p>
-                  </div>
-                </div>
-                
-                <p className="text-slate-600 text-sm leading-relaxed mb-8">{cat.subtitle}</p>
-              </div>
-
-              {/* Document List Preview Grid */}
-              <div className="space-y-2 bg-slate-50/70 p-4 rounded-2xl border border-slate-100/80">
-                {cat.projects.map((proj) => (
-                  <div key={proj.id} className="flex items-center gap-2.5 text-xs font-semibold text-slate-600">
-                    <FileText size={14} className="text-slate-400 flex-shrink-0" />
-                    <span className="truncate">{proj.title}</span>
-                    <span className="ml-auto text-[10px] font-bold text-slate-400 uppercase tracking-wider scale-90 px-1.5 py-0.5 rounded bg-white border border-slate-200/60">
-                      {proj.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          );
-        })}
+    <section ref={sectionRef} id="projects" className="w-full py-20 px-4 md:px-10 bg-orange-600/[0.03] overflow-x-hidden scroll-mt-10">
+      <div className="text-center mb-16 overflow-hidden flex justify-center text-5xl md:text-7xl font-black tracking-tighter text-slate-900">
+        <TextReveal text="PROJECTS" />
       </div>
 
-      {/* ── macOS Notes App Modal Lifecycle ───────────────────────────────── */}
-      <AnimatePresence>
-        {activeCategory && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10">
-            
-            {/* Backdrop Blur Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={BACKDROP_ANIM}
-              onClick={() => setActiveCategory(null)}
-              className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
-            />
-
-            {/* Main macOS App Container */}
-            <motion.div
-              variants={MODAL_ANIM}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="absolute w-full max-w-6xl h-[80vh] min-h-[500px] bg-[#f4f5f6] rounded-2xl border border-black/10 shadow-2xl overflow-hidden flex flex-col"
-            >
-              
-              {/* macOS Window Titlebar */}
-              <div className="h-12 bg-[#ebebeb] border-b border-slate-300/80 px-4 flex items-center select-none flex-shrink-0 relative">
-                {/* Clean Closing Window Button */}
-                <div className="flex items-center absolute left-4 z-10">
-                  <button 
-                    onClick={() => setActiveCategory(null)}
-                    className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] flex items-center justify-center group relative"
-                  >
-                    <X size={8} className="text-[#4c0002] opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                </div>
-
-                {/* Window Title Label */}
-                <div className="w-full text-center flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
-                  <Folder size={14} className="text-slate-400" />
-                  <span>Notes — {activeCategory.title}</span>
-                </div>
-              </div>
-
-              {/* macOS Body Split Layout */}
-              <div className="flex flex-1 overflow-hidden w-full">
-                
-                {/* Left Sidebar: File list items */}
-                <div className="w-64 sm:w-72 bg-[#e1e2e4]/60 border-r border-slate-300/60 overflow-y-auto p-2 space-y-1 select-none flex-shrink-0">
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 tracking-wider uppercase">
-                    Notes
-                  </div>
-                  {activeCategory.projects.map((proj) => {
-                    const isSelected = selectedProject?.id === proj.id;
-                    return (
-                      <div
-                        key={proj.id}
-                        onClick={() => setSelectedProject(proj)}
-                        className={`p-3 rounded-lg cursor-pointer transition-all ${
-                          isSelected 
-                            ? "bg-[#ffbd2e]/20 border border-[#dfa223]/30 shadow-sm" 
-                            : "hover:bg-slate-200/50 border border-transparent"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <FileText size={14} className={isSelected ? "text-[#b27d0f]" : "text-slate-400"} />
-                          <h4 className={`text-xs font-bold truncate ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
-                            {proj.title}
-                          </h4>
-                        </div>
-                        <p className="text-[11px] text-slate-400 line-clamp-1 pl-5 font-medium">
-                          {proj.subtitle}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Right Panel: Clean Solid White Canvas Layout */}
-                <div className="flex-1 bg-white relative overflow-y-auto px-8 py-10 sm:px-12">
-                  
-                  <AnimatePresence mode="wait">
-                    {selectedProject ? (
-                      <motion.div
-                        key={selectedProject.id}
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -5 }}
-                        transition={{ duration: 0.18 }}
-                        className="relative z-10 max-w-3xl text-slate-800"
-                      >
-                        {/* Meta Tags Bar */}
-                        <div className="flex flex-wrap items-center gap-2 font-sans mb-4 scale-95 origin-left">
-                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600">
-                            {selectedProject.type}
-                          </span>
-                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-700">
-                            {selectedProject.status}
-                          </span>
-                          
-                          {/* Code Repos & Deployment Hyperlinks */}
-                          <div className="ml-auto flex items-center gap-3 font-medium">
-                            {selectedProject.liveLink && selectedProject.liveLink !== "#" && (
-                              <a 
-                                href={selectedProject.liveLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-1 text-xs text-blue-600 hover:underline font-sans font-bold"
-                              >
-                                <ExternalLink size={12} />
-                                Live Demo
-                              </a>
-                            )}
-                            {selectedProject.githubLink && selectedProject.githubLink !== "#" && (
-                              <a 
-                                href={selectedProject.githubLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-1 text-xs text-slate-600 hover:underline font-sans font-bold"
-                              >
-                                <Github size={12} />
-                                GitHub
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Project Heading Title Line */}
-                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight font-sans mb-1">
-                          {selectedProject.title}
-                        </h1>
-                        <p className="text-base text-slate-400 font-sans font-semibold italic border-b border-dashed border-slate-200 pb-4 mb-6">
-                          {selectedProject.subtitle}
-                        </p>
-
-                        {/* Summary Block */}
-                        <div className="mb-8 font-sans text-sm font-medium leading-relaxed text-slate-600 border-l-2 border-slate-300 pl-4 py-1 italic">
-                          {selectedProject.desc}
-                        </div>
-
-                        {/* Core Implementation Technical Highlights */}
-                        <div className="mb-8 font-sans">
-                          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">
-                            Specifications
-                          </h3>
-                          <ul className="space-y-3">
-                            {selectedProject.highlights.map((item, idx) => (
-                              <li key={idx} className="flex gap-2.5 text-xs text-slate-600 leading-relaxed font-medium">
-                                <span className="text-amber-500 flex-shrink-0 mt-0.5">▪</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Technologies Tags Footing */}
-                        <div className="font-sans border-t border-slate-100 pt-6">
-                          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">
-                            Metadata Index Tags
-                          </h3>
-                          <div className="flex flex-wrap gap-1.5">
-                            {selectedProject.tags.map((tag) => (
-                              <span 
-                                key={tag} 
-                                className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200/60 px-2 py-1 rounded-md"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                      </motion.div>
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-slate-300 font-sans text-xs font-semibold">
-                        Select a file snippet from the catalog sidebar
-                      </div>
+      <div className="max-w-[1400px] mx-auto flex flex-col gap-10 items-center relative">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 overflow-visible relative">
+          <AnimatePresence mode="popLayout">
+            {allProjects.map((proj) => {
+              const isExpanded = expandedCard === proj.id;
+              return (
+                <motion.div key={proj.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4, ease: "easeInOut" }} className="project-card-wrapper w-full h-full overflow-visible relative">
+                  {proj.id === 'jansaarthi' && (
+                    <div className={`absolute inset-0 rounded-xl bg-transparent pointer-events-none z-0 transition-all duration-500 ease-out ${isExpanded ? "opacity-100 scale-[1.01] shadow-[0_-20px_40px_-15px_rgba(234,88,12,0.35),0_20px_40px_-15px_rgba(22,163,74,0.35)]" : "opacity-0 scale-95"}`} />
+                  )}
+                  <motion.div whileHover={{ scale: 0.995 }} className={`relative project-card ${proj.bg} ${proj.textColor} h-[550px] md:h-[650px] rounded-xl overflow-hidden shadow-sm z-10`}>
+                    {proj.isFeatured && (
+                      <span className={`absolute top-4 right-4 z-30 rounded-full bg-orange-600 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all duration-300 ${isExpanded ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>Featured Project</span>
                     )}
-                  </AnimatePresence>
-
-                </div>
-              </div>
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-    </div>
+                    <div className="h-[60%] w-full overflow-hidden relative bg-slate-50">
+                      <img src={proj.image} alt={`${proj.title} preview`} className={`h-full w-full transition-transform duration-700 ${proj.id === "recovery-mate" ? "object-cover object-top" : "object-cover"} ${isExpanded && proj.id !== "recovery-mate" ? "scale-105" : ""}`} />
+                    </div>
+                    <div className={`absolute left-0 right-0 bottom-0 z-0 bg-white transition-all duration-500 ease-out ${isExpanded ? "top-0 rounded-t-none" : "top-[58%] rounded-t-xl"}`} />
+                    <div className={`absolute inset-x-0 bottom-0 z-20 flex flex-col items-center px-6 text-center transition-all duration-500 ease-out ${isExpanded ? "top-0 justify-start gap-4 overflow-y-auto py-8 h-full" : "top-[58%] justify-between py-4 h-[42%]"}`}>
+                      <div className="transition-all duration-500 w-full flex flex-col items-center">
+                        <h2 className={`mb-0.5 text-2xl font-extrabold tracking-tight transition-colors duration-300 md:text-3xl ${isExpanded ? "text-orange-600" : "text-slate-900"}`}>{proj.title}</h2>
+                        <p className="text-xs font-medium text-slate-500 md:text-sm px-4 mb-2 line-clamp-1">
+                          <span className={proj.hoverSubtitle && isExpanded ? "hidden" : "inline"}>{proj.subtitle}</span>
+                          {proj.hoverSubtitle && isExpanded && <span className="inline text-orange-600 font-semibold italic opacity-100 translate-y-0 transition-all duration-500 ease-out">{proj.hoverSubtitle}</span>}
+                        </p>
+                        {proj.tags && <TagCarousel tags={proj.tags} />}
+                      </div>
+                      {isExpanded && proj.description && (
+                        <div className="flex flex-col items-center w-full transition-all duration-500 mt-4">
+                          <div className="w-full max-w-2xl rounded-[32px] bg-white/95 border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.12)] p-6 space-y-8">
+                            <div className="space-y-4"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-600">Overview</p><p className="text-sm leading-7 text-slate-700">{proj.description}</p></div>
+                            {proj.techStack && <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Tech stack</p><div className="flex flex-wrap gap-2">{proj.techStack.map((tech, idx) => <span key={idx} className="rounded-2xl bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200">{tech}</span>)}</div></div>}
+                            {proj.role && <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 mb-2">Role</p><p className="text-sm font-semibold text-slate-800">{proj.role}</p></div>}
+                            {proj.team && <div className="space-y-3"><p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Team</p><div className="flex flex-wrap gap-2">{proj.team.map((member, idx) => <a key={idx} href={member.url} target={member.url === "/" ? "_self" : "_blank"} rel="noopener noreferrer" className="inline-flex items-center rounded-2xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-orange-50 hover:text-orange-600">{member.name}</a>)}</div></div>}
+                          </div>
+                        </div>
+                      )}
+                      <div className={`w-full mt-2 pb-1 ${isExpanded ? 'flex flex-col items-center gap-2' : 'flex items-center gap-4'}`}>
+                        {!isExpanded ? (
+                          <div className="w-full flex items-center gap-4">
+                            <div className="flex-shrink-0">{proj.github && <a href={proj.github} target={proj.github !== "#" ? "_blank" : "_self"} rel={proj.github !== "#" ? "noopener noreferrer" : undefined} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white transition-all hover:bg-orange-600 text-xs md:text-sm">GitHub</a>}</div>
+                            <div className="flex-1" /><div className="flex-shrink-0"><button onClick={() => toggleExpand(proj.id)} className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-orange-600 text-xs md:text-sm"><span>View Details</span></button></div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className={`flex gap-4 transition-all duration-300 ${isExpanded ? "opacity-100 translate-y-0" : "opacity-90"}`}>
+                              {proj.github && proj.github !== "#" && <a href={proj.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2 font-semibold text-white transition-all hover:bg-orange-600 text-xs md:text-sm">GitHub</a>}
+                              {proj.live && proj.live !== "#" && <a href={proj.live} className="inline-block rounded-xl border border-slate-300 bg-white px-5 py-2 font-semibold text-slate-800 transition-all hover:bg-slate-100 text-xs md:text-sm">Live Demo</a>}
+                            </div>
+                            <button onClick={() => toggleExpand(proj.id)} className={`text-xs font-bold tracking-wider uppercase border-b-2 transition-colors duration-200 pt-1 pb-0.5 ${isExpanded ? "text-orange-600 border-orange-600 hover:text-orange-700" : "text-slate-800 border-slate-800 hover:text-orange-600 hover:border-orange-600"}`}>{isExpanded ? "✕ Close Details" : "View Details"}</button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,55 +1,26 @@
 "use client";
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Terminal, Layout, Database, Cpu, Cloud, Palette, BookOpen, Code2 } from 'lucide-react';
+import { Terminal, Layout, Database, Cpu, Cloud, Palette } from 'lucide-react';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+gsap.registerPlugin(ScrollTrigger);
 
 const skillData = [
-  {
-    title: "Core CS Knowledge",
-    icon: <BookOpen size={20} />,
-    skills: [
-      { name: 'DSA', logo: 'https://cdn.simpleicons.org/leetcode/FFA116' },
-      { name: 'DBMS', logo: 'https://cdn.simpleicons.org/postgresql/4169E1' },
-      { name: 'Operating Systems', logo: 'https://cdn.simpleicons.org/linux/FCC624' },
-      { name: 'Computer Networks', logo: 'https://cdn.simpleicons.org/wifi/000000' },
-      { name: 'Machine Learning', logo: 'https://cdn.simpleicons.org/scikitlearn/F7931E' },
-      { name: 'Deep Learning', logo: 'https://cdn.simpleicons.org/pytorch/EE4C2C' },
-      { name: 'Software Project Management', logo: 'https://cdn.simpleicons.org/jira/0052CC' }
-    ]
-  },
-  {
-    title: "Productive Development Skills",
-    icon: <Code2 size={20} />,
-    skills: [
-      { name: 'Web Development', logo: 'https://cdn.simpleicons.org/react/61DAFB' },
-      { name: 'App Development', logo: 'https://cdn.simpleicons.org/flutter/02569B' },
-      { name: 'ML-Model Development', logo: 'https://cdn.simpleicons.org/tensorflow/FF6F00' }
-    ]
-  },
-  {
-    title: "Creative Skills",
-    icon: <Palette size={20} />,
-    skills: [
-      { name: 'Video Compositing', logo: 'https://cdn.simpleicons.org/adobepremierepro/9999FF' },
-      { name: 'Match Moving', logo: 'https://cdn.simpleicons.org/blender/F5792A' },
-      { name: 'Camera Tracking', logo: 'https://cdn.simpleicons.org/autodesk/06A6D7' },
-      { name: 'Model Texturing', logo: 'https://cdn.simpleicons.org/substancedesigner/000000' },
-      { name: 'Animation', logo: 'https://cdn.simpleicons.org/adobeaftereffects/9999FF' }
-    ]
-  }
+  { title: "Frontend", icon: <Layout size={20} />, skills: [{ name: 'React', logo: 'https://cdn.simpleicons.org/react/61DAFB' }, { name: 'Next.js', logo: 'https://cdn.simpleicons.org/nextdotjs/000000' }, { name: 'Tailwind', logo: 'https://cdn.simpleicons.org/tailwindcss/06B6D4' }] },
+  { title: "Backend", icon: <Database size={20} />, skills: [{ name: 'Node.js', logo: 'https://cdn.simpleicons.org/nodedotjs/339933' }, { name: 'Express', logo: 'https://cdn.simpleicons.org/express/000000' }, { name: 'PostgreSQL', logo: 'https://cdn.simpleicons.org/postgresql/4169E1' }, { name: 'MongoDB', logo: 'https://cdn.simpleicons.org/mongodb/47A033' }] },
+  { title: "AI / ML", icon: <Cpu size={20} />, skills: [{ name: 'PyTorch', logo: 'https://cdn.simpleicons.org/pytorch/EE4C2C' }, { name: 'TensorFlow', logo: 'https://cdn.simpleicons.org/tensorflow/FF6F00' }] },
+  { title: "Infrastructure", icon: <Cloud size={20} />, skills: [{ name: 'Git', logo: 'https://cdn.simpleicons.org/git/F05032' }, { name: 'Docker', logo: 'https://cdn.simpleicons.org/docker/2496ED' }, { name: 'AWS', logo: 'https://cdn.simpleicons.org/amazonaws/FF9900' }] },
+  { title: "Creative", icon: <Palette size={20} />, skills: [{ name: 'Blender', logo: 'https://cdn.simpleicons.org/blender/F5792A' }, { name: 'After Effects', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/aftereffects/aftereffects-original.svg' }] }
 ];
 
-export default function Skills() {
+export default function ToolsandFrameworks() {
+  const containerRef = useRef(null);
   const headerRef = useRef([]);
   const cardRefs = useRef([]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
       // Header Animation - simpler, faster
       gsap.fromTo(headerRef.current, 
         { opacity: 0, y: 20 }, 
@@ -60,7 +31,7 @@ export default function Skills() {
           stagger: 0.03, 
           ease: "power2.out",
           scrollTrigger: { 
-            trigger: "#skills-header", 
+            trigger: "#tools-header", 
             start: "top 85%",
             once: true
           }
@@ -86,17 +57,17 @@ export default function Skills() {
           );
         }
       });
-    });
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
-  const headerText = "SKILLS";
+  const headerText = "TOOLS & FRAMEWORKS";
 
   return (
-    <section id="skills" className="min-h-screen bg-orange-600/[0.03] py-24 px-8 flex flex-col items-center">
+    <section ref={containerRef} id="toolsandframeworks" className="min-h-screen bg-orange-600/[0.03] py-24 px-8 flex flex-col items-center">
       
-      <div id="skills-header" className="mb-24 px-10 overflow-hidden">
+      <div id="tools-header" className="mb-24 px-10 overflow-hidden">
         <h2 className="text-6xl md:text-7xl font-black italic tracking-tighter uppercase flex justify-center">
           {headerText.split("").map((char, i) => (
             <span 
@@ -120,7 +91,8 @@ export default function Skills() {
 
             <div className="flex-1 flex flex-wrap gap-4 border-l border-black/5 pl-10">
               {data.skills.map((skill) => (
-                <div key={skill.name} className="group relative px-5 py-3 rounded-2xl border border-black/5 hover:border-orange-600 bg-slate-50 transition-all">
+                <div key={skill.name} className="group relative px-5 py-3 rounded-2xl border border-black/5 hover:border-orange-600 bg-slate-50 transition-all flex items-center gap-3">
+                  <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain" />
                   <span className="font-semibold text-slate-700 text-sm">{skill.name}</span>
                 </div>
               ))}

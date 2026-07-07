@@ -4,15 +4,24 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-export default function ModelView({ startAnimation }) {
+export default function ModelView({ startAnimation, staticMode = false, useVideoTexture = false }) {
   const mountRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   
   const mixerRef = useRef(null);
+  const canvasRef = useRef(null);
   const videoRef = useRef(null);
   const controlsRef = useRef(null);
   const modelLoadedRef = useRef(false);
   const actionsRef = useRef([]);
+  const cameraRef = useRef(null);
+  const staticModeRef = useRef(staticMode);
+  const animationCompletedRef = useRef(false);
+  
+  // Update ref when staticMode changes
+  useEffect(() => {
+    staticModeRef.current = staticMode;
+  }, [staticMode]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -28,7 +37,8 @@ export default function ModelView({ startAnimation }) {
       1000
     );
     
-    camera.position.set(0, 10, 65);
+    camera.position.set(0, 1, 65);
+    cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -61,7 +71,7 @@ export default function ModelView({ startAnimation }) {
 
     // BACK LIGHTING (White Rim Light)
     // Strong rim light behind the model to illuminate the Apple logo and lid edges
-    const backWhiteRim = new THREE.DirectionalLight(0xffffff, 0.6);
+    const backWhiteRim = new THREE.DirectionalLight(0x0DFF8C00, 0.6);
     backWhiteRim.position.set(-15, 15, -25);
     scene.add(backWhiteRim);
 
@@ -74,29 +84,142 @@ export default function ModelView({ startAnimation }) {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.enableZoom = false;
-    controls.enabled = false;
+    controls.enablePan = false;
+    controls.enabled = true;
+    controls.minDistance = 15;
+    controls.maxDistance = 80;
     
     controls.target.set(0, 0, 0); 
     controlsRef.current = controls;
 
-    // Video texture implementation
-    const video = document.createElement("video");
-    video.src = "/videos/Animater.mp4";
-    video.muted = true;
-    video.playsInline = true;
-    video.crossOrigin = "anonymous";
-    video.loop = false; 
+    let screenTexture;
     
-    video.addEventListener("ended", () => {
-      video.pause();
-      video.currentTime = video.duration - 0.05; 
-    });
-    
-    videoRef.current = video;
+    if (useVideoTexture) {
+      // Video texture implementation with preload
+      const video = document.createElement("video");
+      video.src = "/videos/Animater.mp4";
+      video.muted = true;
+      video.playsInline = true;
+      video.crossOrigin = "anonymous";
+      video.loop = false;
+      video.preload = "auto"; // Preload the video
+      video.style.position = "absolute";
+      video.style.top = "-9999px";
+      video.style.left = "-9999px";
+      video.style.width = "1px";
+      video.style.height = "1px";
+      video.style.opacity = "0.01";
+      document.body.appendChild(video);
+      
+      // Start loading immediately
+      video.load();
+      
+      // Aggressive autoplay on any ready state
+      const attemptPlay = () => {
+        video.play().catch(() => {
+          // Silent catch - will retry
+        });
+      };
+      
+      video.addEventListener("loadedmetadata", attemptPlay);
+      video.addEventListener("canplay", attemptPlay);
+      video.addEventListener("canplaythrough", attemptPlay);
+      
+      video.addEventListener("ended", () => {
+        video.pause();
+        video.currentTime = video.duration - 0.05;
+      });
+      
+      videoRef.current = video;
+      screenTexture = new THREE.VideoTexture(video);
+      screenTexture.colorSpace = THREE.SRGBColorSpace;
+      screenTexture.flipY = true;
+    } else {
+      // Canvas texture implementation for Contact page
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 768;
+      const ctx = canvas.getContext("2d");
+      canvasRef.current = canvas;
 
-    const videoTexture = new THREE.VideoTexture(video);
-    videoTexture.colorSpace = THREE.SRGBColorSpace;
-    videoTexture.flipY = true;
+      // Draw Contact page design on canvas
+      const drawContactPage = () => {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 48px Arial";
+        ctx.fillText("Thank You", 50, 100);
+        ctx.fillStyle = "#374151";
+        ctx.font = "bold 40px Arial";
+        ctx.fillText("for visiting", 50, 160);
+        ctx.fillStyle = "#4b5563";
+        ctx.font = "18px Arial";
+        const message = "I appreciate you taking the time to explore my portfolio. If you have any questions, opportunities, or just want to connect, feel free to reach out.";
+        ctx.fillText(message, 50, 220, 400);
+        ctx.fillStyle = "#dbeafe";
+        ctx.beginPath();
+        ctx.arc(70, 300, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#2563eb";
+        ctx.font = "16px Arial";
+        ctx.fillText("Email", 110, 290);
+        ctx.fillStyle = "#000000";
+        ctx.font = "14px Arial";
+        ctx.fillText("benikam.srikar@example.com", 110, 310);
+        ctx.fillStyle = "#dbeafe";
+        ctx.beginPath();
+        ctx.arc(70, 360, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#2563eb";
+        ctx.font = "16px Arial";
+        ctx.fillText("Location", 110, 350);
+        ctx.fillStyle = "#000000";
+        ctx.font = "14px Arial";
+        ctx.fillText("Hyderabad, India", 110, 370);
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(500, 50);
+        ctx.lineTo(500, 700);
+        ctx.stroke();
+        ctx.fillStyle = "#f3f4f6";
+        ctx.fillRect(550, 80, 424, 600);
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(550, 80, 424, 600);
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 36px Arial";
+        ctx.fillText("Contact Us", 620, 140);
+        ctx.fillStyle = "#4b5563";
+        ctx.font = "16px Arial";
+        ctx.fillText("Send me a message and I'll get back to you", 570, 180, 380);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(570, 220, 384, 40);
+        ctx.strokeStyle = "#d1d5db";
+        ctx.strokeRect(570, 220, 384, 40);
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "14px Arial";
+        ctx.fillText("Name", 580, 245);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(570, 280, 384, 40);
+        ctx.strokeRect(570, 280, 384, 40);
+        ctx.fillText("Email", 580, 305);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(570, 340, 384, 120);
+        ctx.strokeRect(570, 340, 384, 120);
+        ctx.fillText("Message", 580, 365);
+        ctx.fillStyle = "#2563eb";
+        ctx.fillRect(570, 500, 384, 48);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("Send Message", 680, 530);
+      };
+
+      drawContactPage();
+      screenTexture = new THREE.CanvasTexture(canvas);
+      screenTexture.colorSpace = THREE.SRGBColorSpace;
+      screenTexture.flipY = true;
+    }
 
     const clock = new THREE.Clock();
     const loader = new GLTFLoader();
@@ -120,12 +243,12 @@ export default function ModelView({ startAnimation }) {
         const screen = model.getObjectByName("Object_123");
         if (screen && screen.isMesh) {
           screen.material = new THREE.MeshStandardMaterial({
-            map: videoTexture,
+            map: screenTexture,
             roughness: 0.1, 
             metalness: 0.1,
             emissive: new THREE.Color(0xffffff),
-            emissiveMap: videoTexture,
-            emissiveIntensity: 1.1, 
+            emissiveMap: screenTexture,
+            emissiveIntensity: useVideoTexture ? 1.1 : 0.8, 
             toneMapped: true, 
           });
         }
@@ -155,7 +278,24 @@ export default function ModelView({ startAnimation }) {
       let delta = clock.getDelta();
       if (delta <= 0 || delta > 0.1) delta = 0.016;
       
-      if (mixerRef.current) mixerRef.current.update(delta);
+      if (mixerRef.current) {
+        // Only update mixer if animation hasn't completed in static mode
+        if (!staticModeRef.current || !animationCompletedRef.current) {
+          mixerRef.current.update(delta);
+          
+          // Check if animation completed in static mode
+          if (staticModeRef.current && actionsRef.current.length > 0) {
+            const allCompleted = actionsRef.current.every(action => action.time >= action.getClip().duration - 0.05);
+            if (allCompleted) {
+              // Mark as completed and pause all actions
+              animationCompletedRef.current = true;
+              actionsRef.current.forEach(action => {
+                action.paused = true;
+              });
+            }
+          }
+        }
+      }
       if (controls) controls.update();
       renderer.render(scene, camera);
     };
@@ -171,27 +311,34 @@ export default function ModelView({ startAnimation }) {
     return () => {
       if (frameId) cancelAnimationFrame(frameId);
       window.removeEventListener("resize", handleResize);
-      if (video) video.pause();
-      videoTexture.dispose();
+      if (screenTexture) screenTexture.dispose();
+      if (videoRef.current) {
+        videoRef.current.pause();
+        if (videoRef.current.parentNode) {
+          videoRef.current.parentNode.removeChild(videoRef.current);
+        }
+      }
       if (renderer) renderer.dispose();
     };
   }, []);
 
   useEffect(() => {
-    if (startAnimation && modelLoadedRef.current) {
+    if (startAnimation && modelLoadedRef.current && !staticMode) {
       actionsRef.current.forEach(action => action.play());
-
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(e => console.log("Video setup delay block:", e));
-        }
-      }, 700);
 
       setTimeout(() => {
         if (controlsRef.current) controlsRef.current.enabled = true;
       }, 2500);
     }
-  }, [startAnimation]);
+    
+    if (staticMode && modelLoadedRef.current) {
+      // Enable controls immediately for static mode
+      if (controlsRef.current) controlsRef.current.enabled = true;
+      
+      // Play animation to reach last frame
+      actionsRef.current.forEach(action => action.play());
+    }
+  }, [startAnimation, staticMode, useVideoTexture]);
 
   return (
     <div className="w-full h-full relative bg-transparent">

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -12,6 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
+
 export const metadata = {
   title: "Benikam Srikar — Portfolio",
   description: "Software Engineer · Backend · Distributed Systems · Real-Time Systems",
@@ -19,6 +29,11 @@ export const metadata = {
   authors: [{ name: "Benikam Srikar" }],
   creator: "Benikam Srikar",
   viewport: "width=device-width, initial-scale=1.0",
+  icons: {
+    icon: "/user-icon.svg",
+    shortcut: "/user-icon.svg",
+    apple: "/user-icon.svg",
+  },
   openGraph: {
     title: "Benikam Srikar — Portfolio",
     description: "Software Engineer · Backend · Distributed Systems · Real-Time Systems",
@@ -39,7 +54,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <ErrorBoundary>
           {children}

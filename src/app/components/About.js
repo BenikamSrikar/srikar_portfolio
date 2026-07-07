@@ -3,14 +3,15 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
   const sectionRef = useRef(null);
   const profileRef = useRef(null);
   const cardsRef = useRef(null);
+  const aboutTextRef = useRef(null);
+  const meTextRef = useRef(null);
+  const rightContentRef = useRef(null);
 
   // Structural DOM References for Slot Machine Digit Displays
   const cgpaRef = useRef(null);
@@ -19,110 +20,69 @@ export default function About() {
   const certRef = useRef(null);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const ctx = gsap.context(() => {
-        // Left Column Entrance Vector
-        gsap.from(profileRef.current, { 
-          x: -100, 
-          opacity: 0, 
-          duration: 1.2, 
-          ease: "power4.out", 
-          scrollTrigger: { trigger: profileRef.current, start: "top 90%" } 
-        });
-        
-        // Right Headings Entrance Vector
-        gsap.from(".about-title", { 
-          y: 40, 
-          opacity: 0, 
-          duration: 1, 
-          ease: "power3.out", 
-          scrollTrigger: { trigger: ".about-title", start: "top 90%" } 
-        });
-        
-        // Text Framework Paragraph Fades
-        gsap.from(".about-para", { 
-          opacity: 0, 
-          y: 25, 
-          duration: 1, 
-          ease: "power2.out", 
-          stagger: 0.15, 
-          scrollTrigger: { trigger: ".about-para-1", start: "top 85%" } 
-        });
+    if (!sectionRef.current) return;
 
-        // Cards Matrix Subtle Shift & Apply Hardware Flickering Style Class dynamically
-        const cards = gsap.utils.toArray(".stat-card");
-        gsap.fromTo(cards, 
-          { y: 30, opacity: 0 }, 
-          { 
-            y: 0, 
-            opacity: 1, 
-            duration: 0.8, 
-            stagger: 0.08, 
-            ease: "power3.out", 
-            scrollTrigger: { trigger: cardsRef.current, start: "top 95%" },
-            onComplete: () => {
-              // Append flickering engine once cards arrive
-              cards.forEach(card => card.classList.add("animate-flicker-load"));
-            }
-          }
-        );
+    const ctx = gsap.context(() => {
+      // Simpler About section animations
+      gsap.set([aboutTextRef.current, meTextRef.current], { opacity: 0, y: 15, willChange: "transform, opacity" });
+      gsap.set(profileRef.current, { opacity: 0, scale: 0.95, willChange: "transform, opacity" });
+      gsap.set(rightContentRef.current, { opacity: 0, y: 20, willChange: "transform, opacity" });
+      gsap.set(".stat-card-wrapper", { scale: 0.9, opacity: 0, willChange: "transform, opacity" });
 
-        // --- THE BRIEFCASE LOCKER CRYPTO COUNTER LOGIC ---
-        const runLockerAnimation = (ref, targetString) => {
-          const element = ref.current;
-          if (!element) return;
+      // Create faster timeline
+      const tl = gsap.timeline({ 
+        defaults: { ease: "power2.out" },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          once: true
+        }
+      });
 
-          const targetChars = targetString.split("");
-          const cyclesPerPosition = 18; 
-          const frameRate = 40; 
-          let currentCycle = 0;
+      // Animate title
+      tl.to([aboutTextRef.current, meTextRef.current], { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.4, 
+        stagger: 0.1,
+        onComplete: () => gsap.set([aboutTextRef.current, meTextRef.current], { willChange: "auto" })
+      }, 0);
+      
+      // Animate profile icon
+      tl.to(profileRef.current, { 
+        opacity: 1, 
+        scale: 1, 
+        duration: 0.5,
+        onComplete: () => gsap.set(profileRef.current, { willChange: "auto" })
+      }, 0.2);
+      
+      // Animate right content
+      tl.to(rightContentRef.current, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.5,
+        onComplete: () => gsap.set(rightContentRef.current, { willChange: "auto" })
+      }, 0.3);
+      
+      // Animate cards
+      tl.to(".stat-card-wrapper", { 
+        scale: 1, 
+        opacity: 1, 
+        duration: 0.4, 
+        stagger: 0.08,
+        ease: "back.out(1.4)",
+        onComplete: () => gsap.set(".stat-card-wrapper", { willChange: "auto" })
+      }, 0.5);
+    }, sectionRef);
 
-          const interval = setInterval(() => {
-            const currentOutput = targetChars.map((char, index) => {
-              if (isNaN(parseInt(char))) return char;
-              
-              if (currentCycle < cyclesPerPosition + index * 4) {
-                return Math.floor(Math.random() * 10).toString();
-              }
-              return char;
-            });
-
-            element.innerText = currentOutput.join("");
-            currentCycle++;
-
-            if (currentCycle >= cyclesPerPosition + targetChars.length * 4) {
-              clearInterval(interval);
-              element.innerText = targetString; 
-            }
-          }, frameRate);
-        };
-
-        // ScrollTrigger Orchestration mapping execution for Slot Counters
-        ScrollTrigger.create({
-          trigger: cardsRef.current,
-          start: "top 95%",
-          onEnter: () => {
-            // Initiate the rolling effect slightly delayed to sync up with the visual loading flicker
-            setTimeout(() => {
-              runLockerAnimation(cgpaRef, "8.45");
-              runLockerAnimation(majorRef, "2");
-              runLockerAnimation(hackRef, "2");
-              runLockerAnimation(certRef, "4");
-            }, 300);
-          }
-        });
-
-      }, sectionRef);
-    }, 100);
-    
-    return () => { 
-      clearTimeout(timeoutId); 
-      ScrollTrigger.getAll().forEach(t => t.kill()); 
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section id="about" ref={sectionRef} className="relative w-full min-h-screen bg-[#f5f5f7] text-[#1d1d1f] flex flex-col items-center justify-center py-24 px-6 md:px-16 lg:px-24 font-sans antialiased overflow-hidden">
+    <section id="about" ref={sectionRef} className="relative w-full min-h-screen bg-[#f5f5f7] text-[#1d1d1f] flex flex-col items-center justify-center py-24 px-6 md:px-16 lg:px-24 font-sans antialiased overflow-hidden" style={{ position: 'relative' }}>
+      
+      {/* Orange overlay that animates */}
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'transparent' }} ref={(el) => { if (el && sectionRef.current) sectionRef.current.overlayRef = el; }}></div>
       
       {/* INLINE CORE KEYFRAME STYLES FOR FLICKER EFFECT */}
       <style>{`
@@ -142,83 +102,79 @@ export default function About() {
 
       <div className="w-full max-w-6xl mx-auto relative z-10">
         
-        {/* EDITORIAL SECTION ANCHOR */}
-        <div className="w-full mb-16 md:mb-24 text-center md:text-left">
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight text-black">
-            About <span className="text-blue-600">Me.</span>
+        {/* EDITORIAL SECTION ANCHOR WITH SPLIT ANIMATION */}
+        <div className="w-full mb-16 md:mb-24 text-center overflow-hidden">
+          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight">
+            <span ref={aboutTextRef} className="inline-block transition-colors duration-300 hover:!text-orange-600">About</span>
+            <span className="inline-block w-4"></span>
+            <span ref={meTextRef} className="inline-block transition-colors duration-300 hover:!text-orange-600">Me.</span>
           </h2>
         </div>
 
-        {/* ASYMMETRICAL COLUMN CONTROL PLATFORM */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-20 items-start w-full">
+        {/* NEW LAYOUT: Equal width - Photo left with margin, Content right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start w-full">
           
-          {/* COLUMN 1: LEFT ANCHOR (AVATAR + STATS BOXES DIRECTLY BELOW IT) */}
-          <div ref={profileRef} className="md:col-span-5 lg:col-span-4 flex flex-col items-center md:items-stretch gap-6 sticky top-10">
-            {/* PROFILE AVATAR BLOCK PANEL */}
-            <div className="w-72 h-72 sm:w-80 sm:h-80 md:w-full md:h-auto md:aspect-square bg-white rounded-3xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-200/60 overflow-hidden group mx-auto">
-              <div className="w-full h-full rounded-2xl overflow-hidden bg-slate-100 relative">
-                <img 
-                  src="/images/profile.png" 
-                  alt="Benikam Srikar" 
-                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=1000";
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* BOXES REPOSITIONED DIRECTLY BELOW THE AVATAR IMAGE WITH FONT AND TIMING ENHANCEMENTS */}
-            <div ref={cardsRef} className="grid grid-cols-2 gap-3 w-full max-w-sm md:max-w-none mx-auto pt-2">
-              {[ 
-                { ref: cgpaRef, label: "Current B.Tech CGPA", val: "0.00" }, 
-                { ref: majorRef, label: "Core Projects Shipped", val: "0" }, 
-                { ref: hackRef, label: "Hackathons Logged", val: "0", suffix: "+" }, 
-                { ref: certRef, label: "Certifications", val: "0" } 
-              ].map((stat, i) => (
-                <div key={i} className="stat-card flex flex-col items-start bg-white border border-slate-200/60 rounded-2xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-colors hover:border-slate-300">
-                  <span className="text-[9px] text-[#86868b] font-semibold uppercase tracking-wider mb-1.5">{stat.label}</span>
-                  <div className="text-2xl md:text-3xl font-black font-mono tracking-tighter text-black flex items-center">
-                    <span ref={stat.ref}>{stat.val}</span>
-                    {stat.suffix && <span className="text-blue-600 ml-0.5 font-sans font-bold text-xl">{stat.suffix}</span>}
-                  </div>
-                </div>
-              ))}
+          {/* LEFT COLUMN: Profile Icon with left margin */}
+          <div className="flex flex-col overflow-hidden pl-0 lg:pl-12">
+            <div 
+              ref={profileRef} 
+              className="w-full h-[400px] sm:h-[500px] lg:h-[600px] bg-white rounded-3xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-200/60 overflow-hidden group flex items-center justify-center"
+            >
+              {/* User SVG Icon */}
+              <svg 
+                className="w-3/4 h-3/4 text-orange-500 transition-transform duration-700 ease-out group-hover:scale-105"
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
             </div>
           </div>
 
-          {/* COLUMN 2: THE NARRATIVE CONTENT CONTAINER */}
-          <div className="md:col-span-7 lg:col-span-8 flex flex-col space-y-12">
+          {/* RIGHT COLUMN: CONTENT + CARDS */}
+          <div ref={rightContentRef} className="flex flex-col space-y-8">
             
+            {/* Name and Intro */}
             <div className="space-y-6 text-left">
               <h3 className="about-title text-3xl sm:text-4xl md:text-5xl font-semibold text-black tracking-tight leading-tight">
                 Benikam Srikar
               </h3>
 
-              <div className="h-[2px] w-12 bg-blue-600 rounded-full mb-8" />
+              <div className="h-[2px] w-12 bg-orange-600 rounded-full" />
 
-              <p className="about-para about-para-1 text-[#424245] text-lg sm:text-xl font-normal leading-relaxed tracking-tight">
-                I am a <span className="text-black font-semibold">Full-Stack Software Engineer</span> specialized in building <span className="text-blue-600 font-semibold italic">resilient real-time architectures</span>, peer-to-peer systems, and data pipelines. Driven by a meticulous approach to software design, I focus on bridging the gap between low-level system efficiency and premium user interaction.
+              {/* New passionate student text */}
+              <p className="about-para about-para-1 text-[#424245] text-base md:text-lg font-normal leading-relaxed tracking-tight">
+                I'm a passionate student and aspiring software developer with a keen interest in generative AI and problem solving. Skilled in full-stack development and always eager to learn, I enjoy tackling complex challenges and transforming ideas into impactful applications. My journey in technology is driven by curiosity, continuous learning, and the desire to create solutions that positively influence people's lives.
               </p>
+            </div>
 
-              <p className="about-para about-para-2 text-[#424245] text-base md:text-lg font-normal leading-relaxed border-l-3 border-blue-600 pl-6 py-1 bg-white/40 rounded-r-xl pr-4 shadow-sm border border-l-0 border-slate-200/40">
-                From engineering a zero-storage P2P data engine through <span className="text-black font-semibold italic">six technical iterations</span> to co-authoring high-accuracy ML studies with international research teams reaching <span className="text-blue-600 font-bold tracking-tight bg-blue-50 px-1.5 py-0.5 rounded">99.47% accuracy</span>, I build custom web infrastructure with high operational reliability and an uncompromising quality standard.
-              </p>
-
-              <div className="about-para about-para-3 text-[#86868b] text-sm sm:text-base leading-relaxed pt-2">
-                <span className="text-black font-semibold block mb-2 text-xs uppercase tracking-wider text-slate-400">Research Focus Areas:</span>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {[
-                    "Distributed Systems", "Computer Graphics", "Computer Vision", 
-                    "Machine Learning", "Visual Computing", "Real-Time Systems", 
-                    "Human-Computer Interaction", "AI-assisted Content Creation"
-                  ].map((interest) => (
-                    <span key={interest} className="bg-white border border-slate-200 text-[#1d1d1f] text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            {/* Stats Cards */}
+            <div ref={cardsRef} className="grid grid-cols-2 gap-3">
+              {[ 
+                { ref: cgpaRef, label: "Current B.Tech CGPA", val: "8.45" }, 
+                { ref: majorRef, label: "Indie Projects", val: "1" }, 
+                { ref: null, label: "Featured Projects", val: "3" }, 
+                { ref: hackRef, label: "Hackathons", val: "5" }, 
+                { ref: certRef, label: "Certifications", val: "4" } 
+              ].map((stat, i) => {
+                const isCert = stat.label === "Certifications";
+                return (
+                  <div key={i} className={`stat-card-wrapper overflow-hidden rounded-2xl bg-orange-600 ${isCert ? "md:col-span-2" : ""}`}>
+                    <div className={`stat-card flex flex-col ${isCert ? "items-center justify-center text-center py-10" : "items-start p-4"} bg-white border border-slate-200/60 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-colors hover:border-slate-300`}>
+                      <span className={`text-[9px] text-[#86868b] font-semibold uppercase tracking-wider mb-1.5 ${isCert ? "w-full" : ""}`}>{stat.label}</span>
+                      <div className="stat-number text-2xl md:text-3xl font-black font-mono tracking-tighter flex items-center justify-center">
+                        <span ref={stat.ref}>{stat.val}</span>
+                        {stat.suffix && <span className="text-blue-600 ml-0.5 font-sans font-bold text-xl">{stat.suffix}</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
           </div>
