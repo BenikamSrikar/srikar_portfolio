@@ -1,12 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default function ModelView({ startAnimation, staticMode = false, useVideoTexture = false, onModelLoad }) {
   const mountRef = useRef(null);
-  const [modelLoaded, setModelLoaded] = useState(false);
   
   const mixerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -270,7 +269,6 @@ export default function ModelView({ startAnimation, staticMode = false, useVideo
         }
         
         modelLoadedRef.current = true;
-        setModelLoaded(true);
         
         // Notify parent that model is loaded
         if (onModelLoad) {
@@ -357,73 +355,10 @@ export default function ModelView({ startAnimation, staticMode = false, useVideo
 
   return (
     <div className="w-full h-full relative bg-transparent">
-      {/* Lightweight placeholder that shows immediately */}
-      {!modelLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative w-full max-w-md">
-            {/* MacBook SVG placeholder - loads instantly */}
-            <svg 
-              viewBox="0 0 400 300" 
-              className="w-full h-auto drop-shadow-2xl"
-              style={{ filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.15))" }}
-            >
-              {/* Laptop base */}
-              <defs>
-                <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: "#1e293b", stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: "#0f172a", stopOpacity: 1 }} />
-                </linearGradient>
-                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: "#e2e8f0", stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: "#cbd5e1", stopOpacity: 1 }} />
-                </linearGradient>
-              </defs>
-              
-              {/* Screen */}
-              <rect x="80" y="20" width="240" height="160" rx="8" fill="url(#screenGrad)" />
-              <rect x="90" y="30" width="220" height="140" rx="4" fill="#000" />
-              
-              {/* Screen content - loading animation */}
-              <rect x="100" y="45" width="200" height="4" rx="2" fill="#ea580c" opacity="0.8">
-                <animate attributeName="width" values="0;200;200;0" dur="2s" repeatCount="indefinite" />
-              </rect>
-              <text x="200" y="100" textAnchor="middle" fill="#64748b" fontSize="12" fontFamily="monospace">
-                Loading 3D Model...
-              </text>
-              
-              {/* Laptop body */}
-              <path d="M 60 180 L 80 180 L 85 200 L 315 200 L 320 180 L 340 180 L 350 220 L 50 220 Z" fill="url(#bodyGrad)" />
-              <rect x="50" y="220" width="300" height="8" rx="4" fill="#94a3b8" />
-              
-              {/* Keyboard hint */}
-              <rect x="150" y="185" width="100" height="8" rx="2" fill="#94a3b8" opacity="0.6" />
-              
-              {/* Loading spinner */}
-              <circle cx="200" cy="260" r="12" fill="none" stroke="#ea580c" strokeWidth="2" strokeDasharray="60" strokeLinecap="round">
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  from="0 200 260"
-                  to="360 200 260"
-                  dur="1s"
-                  repeatCount="indefinite"
-                />
-              </circle>
-            </svg>
-            
-            {/* Loading text */}
-            <p className="text-center mt-6 text-sm text-slate-600 animate-pulse">
-              Loading interactive 3D experience...
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {/* Actual 3D model canvas */}
+      {/* 3D model canvas - visible immediately */}
       <div
         ref={mountRef}
         className="w-full h-full bg-transparent"
-        style={{ opacity: modelLoaded ? 1 : 0, transition: "opacity 0.5s ease-in" }}
       />
     </div>
   );
