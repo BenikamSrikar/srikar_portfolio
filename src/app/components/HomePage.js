@@ -4,10 +4,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Github, Linkedin, ExternalLink, Download } from "lucide-react";
 import ModelView from "./ModelView";
 
-export default function HomePage({ startAnimation }) {
+export default function HomePage({ startAnimation, onModelLoad }) {
   const [index, setIndex] = useState(0);
   const [article, setArticle] = useState("a");
   const prevArticleRef = useRef("a");
+
+  const handleModelLoad = () => {
+    if (onModelLoad) {
+      onModelLoad();
+    }
+  };
 
   const skills = [
     { title: "Frontend Developer", article: "a", desc: "Crafting responsive and accessible interfaces.", icon: "🎨" },
@@ -123,7 +129,12 @@ export default function HomePage({ startAnimation }) {
 
         {/* ModelView Column - Forced to stay on right on large screens */}
         <div className="w-full xl:w-[60%] h-[400px] xl:h-[700px] flex items-center justify-center">
-          <ModelView startAnimation={true} staticMode={false} useVideoTexture={true} />
+          <ModelView 
+            startAnimation={true} 
+            staticMode={false} 
+            useVideoTexture={true} 
+            onModelLoad={handleModelLoad}
+          />
         </div>
       </div>
     </section>

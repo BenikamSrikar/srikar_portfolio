@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-export default function ModelView({ startAnimation, staticMode = false, useVideoTexture = false }) {
+export default function ModelView({ startAnimation, staticMode = false, useVideoTexture = false, onModelLoad }) {
   const mountRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   
@@ -267,6 +267,11 @@ export default function ModelView({ startAnimation, staticMode = false, useVideo
         
         modelLoadedRef.current = true;
         setIsFocused(true);
+        
+        // Notify parent component that model is loaded
+        if (onModelLoad) {
+          onModelLoad();
+        }
       },
       undefined,
       (error) => console.error("Error loading model:", error)
