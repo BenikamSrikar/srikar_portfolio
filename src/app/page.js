@@ -18,10 +18,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleModelLoad = () => {
-    // Add a small delay to ensure smooth transition
+    // Wait a brief moment to ensure smooth transition
     setTimeout(() => {
       setIsLoading(false);
-    }, 500);
+    }, 400);
   };
 
   return (

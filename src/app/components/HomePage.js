@@ -132,7 +132,7 @@ export default function HomePage({ startAnimation, onModelLoad }) {
           <ModelView 
             startAnimation={true} 
             staticMode={false} 
-            useVideoTexture={true} 
+            useVideoTexture={true}
             onModelLoad={handleModelLoad}
           />
         </div>

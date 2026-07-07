@@ -268,7 +268,7 @@ export default function ModelView({ startAnimation, staticMode = false, useVideo
         modelLoadedRef.current = true;
         setIsFocused(true);
         
-        // Notify parent component that model is loaded
+        // Notify parent that model is loaded
         if (onModelLoad) {
           onModelLoad();
         }
