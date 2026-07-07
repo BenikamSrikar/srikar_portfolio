@@ -4,16 +4,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Github, Linkedin, ExternalLink, Download } from "lucide-react";
 import ModelView from "./ModelView";
 
-export default function HomePage({ startAnimation, onModelLoad }) {
+export default function HomePage({ startAnimation }) {
   const [index, setIndex] = useState(0);
   const [article, setArticle] = useState("a");
   const prevArticleRef = useRef("a");
-
-  const handleModelLoad = () => {
-    if (onModelLoad) {
-      onModelLoad();
-    }
-  };
 
   const skills = [
     { title: "Frontend Developer", article: "a", desc: "Crafting responsive and accessible interfaces.", icon: "🎨" },
@@ -133,7 +127,6 @@ export default function HomePage({ startAnimation, onModelLoad }) {
             startAnimation={true} 
             staticMode={false} 
             useVideoTexture={true}
-            onModelLoad={handleModelLoad}
           />
         </div>
       </div>
