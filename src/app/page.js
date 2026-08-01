@@ -1,5 +1,5 @@
 "use client";
-import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
 import HomePage from "./components/HomePage";
 import About from "./components/About";
 import Skills from "./components/Skills";
@@ -14,20 +14,22 @@ import Experience from "./components/Experience";
 
 export default function Home() {
   return (
-    <main className="bg-[#f8faff] min-h-screen w-full overflow-x-hidden">
-      <Navbar />
-      <div id="home">
-        <HomePage startAnimation={true} />
-      </div>
-      <About />
-      <Skills />
-      <ToolsandFrameworks />
-      <Projects />
-      <Experience />
-      <Hackathon />
-      <CertificationCarousel />
-      <Contact />
-      <Footer />
-    </main>
+    <>
+      <Sidebar />
+      <main className="bg-[#f8faff] min-h-screen w-full overflow-x-hidden page-content-with-sidebar">
+        <div id="home">
+          <HomePage startAnimation={true} />
+        </div>
+        <About />
+        <Skills />
+        <ToolsandFrameworks />
+        <Projects />
+        <Experience />
+        <Hackathon />
+        <CertificationCarousel />
+        <Contact />
+        <Footer />
+      </main>
+    </>
   );
 }

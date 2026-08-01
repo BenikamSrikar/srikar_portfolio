@@ -1,7 +1,7 @@
 ﻿"use client";
 import { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Github, Linkedin, ExternalLink, Download } from "lucide-react";
+import { Github, Linkedin, ExternalLink, Download, Mail } from "lucide-react";
 import ModelView from "./ModelView";
 
 export default function HomePage({ startAnimation }) {
@@ -116,6 +116,9 @@ export default function HomePage({ startAnimation }) {
                 </a>
                 <a href="https://www.linkedin.com/in/benikam-srikar-81987429b/" target="_blank" className="p-3 bg-[#0A66C2] text-white rounded-full hover:bg-orange-600 transition-colors">
                     <Linkedin size={20} />
+                </a>
+                <a href="#contact" className="p-3 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
+                    <Mail size={20} />
                 </a>
             </div>
           </div>

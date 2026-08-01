@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Terminal, Layout, Database, Cpu, Cloud, Palette, BookOpen, Code2 } from 'lucide-react';
+import TextReveal from './TextReveal';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -45,28 +46,10 @@ const skillData = [
 ];
 
 export default function Skills() {
-  const headerRef = useRef([]);
   const cardRefs = useRef([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header Animation - simpler, faster
-      gsap.fromTo(headerRef.current, 
-        { opacity: 0, y: 20 }, 
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.6, 
-          stagger: 0.03, 
-          ease: "power2.out",
-          scrollTrigger: { 
-            trigger: "#skills-header", 
-            start: "top 85%",
-            once: true
-          }
-        }
-      );
-
       // Card Animations - simplified
       cardRefs.current.forEach((card, i) => {
         if (card) {
@@ -88,25 +71,17 @@ export default function Skills() {
       });
     });
 
-    return () => ctx.revert();
+    return () => {
+      if (ctx) ctx.revert();
+    };
   }, []);
-
-  const headerText = "SKILLS";
 
   return (
     <section id="skills" className="min-h-screen bg-orange-600/[0.03] py-24 px-8 flex flex-col items-center">
       
       <div id="skills-header" className="mb-24 px-10 overflow-hidden">
-        <h2 className="text-6xl md:text-7xl font-black italic tracking-tighter uppercase flex justify-center">
-          {headerText.split("").map((char, i) => (
-            <span 
-              key={i} 
-              ref={el => headerRef.current[i] = el} 
-              className={`${i < 6 ? "text-orange-600" : "text-black"} inline-block`}
-            >
-              {char === " " ? "\u00A0" : char}
-            </span>
-          ))}
+        <h2 className="text-6xl md:text-7xl font-black italic tracking-tighter uppercase">
+          <TextReveal text="SKILLS" className="justify-center text-orange-600" />
         </h2>
       </div>
 

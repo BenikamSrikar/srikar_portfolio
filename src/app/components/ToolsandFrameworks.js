@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Terminal, Layout, Database, Cpu, Cloud, Palette } from 'lucide-react';
+import TextReveal from './TextReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -59,7 +60,9 @@ export default function ToolsandFrameworks() {
       });
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (ctx) ctx.revert();
+    };
   }, []);
 
   const headerText = "TOOLS & FRAMEWORKS";
@@ -68,16 +71,8 @@ export default function ToolsandFrameworks() {
     <section ref={containerRef} id="toolsandframeworks" className="min-h-screen bg-orange-600/[0.03] py-24 px-8 flex flex-col items-center">
       
       <div id="tools-header" className="mb-24 px-10 overflow-hidden">
-        <h2 className="text-6xl md:text-7xl font-black italic tracking-tighter uppercase flex justify-center">
-          {headerText.split("").map((char, i) => (
-            <span 
-              key={i} 
-              ref={el => headerRef.current[i] = el} 
-              className={`${i < 6 ? "text-orange-600" : "text-black"} inline-block`}
-            >
-              {char === " " ? "\u00A0" : char}
-            </span>
-          ))}
+        <h2 className="text-6xl md:text-7xl font-black italic tracking-tighter uppercase">
+          <TextReveal text="TOOLS & FRAMEWORKS" className="justify-center text-orange-600" />
         </h2>
       </div>
 

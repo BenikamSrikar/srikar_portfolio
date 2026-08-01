@@ -1,5 +1,6 @@
 ﻿"use client";
 import { Briefcase, FileCode2, Landmark, LineChart } from 'lucide-react';
+import TextReveal from './TextReveal';
 
 const timelineData = [
   {
@@ -102,8 +103,7 @@ export default function Experience() {
       <div className="relative max-w-6xl mx-auto px-6">
         <div className="mb-16 text-center relative z-10">
           <h2 className="text-5xl font-black tracking-tight">
-            <span className="text-orange-600">My</span>{' '}
-            <span className="text-slate-900">Journey</span>
+            <TextReveal text="My Journey" className="justify-center" />
           </h2>
           <p className="mt-4 text-sm text-slate-500 max-w-2xl mx-auto">
             A clean alternate timeline with education first, then experience — each milestone slides in and the center path fills as you scroll.

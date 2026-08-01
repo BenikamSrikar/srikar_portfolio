@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import TextReveal from "./TextReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,62 +21,74 @@ export default function About() {
   const certRef = useRef(null);
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    const section = sectionRef.current;
+    if (!section) return;
 
-    const ctx = gsap.context(() => {
-      // Simpler About section animations
-      gsap.set([aboutTextRef.current, meTextRef.current], { opacity: 0, y: 15, willChange: "transform, opacity" });
-      gsap.set(profileRef.current, { opacity: 0, scale: 0.95, willChange: "transform, opacity" });
-      gsap.set(rightContentRef.current, { opacity: 0, y: 20, willChange: "transform, opacity" });
-      gsap.set(".stat-card-wrapper", { scale: 0.9, opacity: 0, willChange: "transform, opacity" });
+    try {
+      // Set initial states - with safety checks
+      if (aboutTextRef.current) gsap.set(aboutTextRef.current, { opacity: 0, y: 15 });
+      if (meTextRef.current) gsap.set(meTextRef.current, { opacity: 0, y: 15 });
+      if (profileRef.current) gsap.set(profileRef.current, { opacity: 0, scale: 0.95 });
+      if (rightContentRef.current) gsap.set(rightContentRef.current, { opacity: 0, y: 20 });
+      
+      const cardWrappers = section.querySelectorAll(".stat-card-wrapper");
+      if (cardWrappers.length > 0) {
+        gsap.set(cardWrappers, { scale: 0.9, opacity: 0 });
+      }
 
-      // Create faster timeline
-      const tl = gsap.timeline({ 
-        defaults: { ease: "power2.out" },
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          once: true
-        }
+      // Simple fade-in animations with IntersectionObserver
+      const handleIntersection = (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !entry.target.dataset.animated) {
+            entry.target.dataset.animated = "true";
+            
+            // Animate title
+            if (aboutTextRef.current) {
+              gsap.to(aboutTextRef.current, { opacity: 1, y: 0, duration: 0.4, delay: 0 });
+            }
+            if (meTextRef.current) {
+              gsap.to(meTextRef.current, { opacity: 1, y: 0, duration: 0.4, delay: 0.1 });
+            }
+            
+            // Animate profile
+            if (profileRef.current) {
+              gsap.to(profileRef.current, { opacity: 1, scale: 1, duration: 0.5, delay: 0.2 });
+            }
+            
+            // Animate right content
+            if (rightContentRef.current) {
+              gsap.to(rightContentRef.current, { opacity: 1, y: 0, duration: 0.5, delay: 0.3 });
+            }
+            
+            // Animate cards
+            const cards = entry.target.querySelectorAll(".stat-card-wrapper");
+            if (cards.length > 0) {
+              gsap.to(cards, {
+                scale: 1,
+                opacity: 1,
+                duration: 0.4,
+                delay: 0.5,
+                stagger: 0.08,
+                ease: "back.out(1.4)"
+              });
+            }
+          }
+        });
+      };
+
+      const observer = new IntersectionObserver(handleIntersection, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
       });
 
-      // Animate title
-      tl.to([aboutTextRef.current, meTextRef.current], { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.4, 
-        stagger: 0.1,
-        onComplete: () => gsap.set([aboutTextRef.current, meTextRef.current], { willChange: "auto" })
-      }, 0);
-      
-      // Animate profile icon
-      tl.to(profileRef.current, { 
-        opacity: 1, 
-        scale: 1, 
-        duration: 0.5,
-        onComplete: () => gsap.set(profileRef.current, { willChange: "auto" })
-      }, 0.2);
-      
-      // Animate right content
-      tl.to(rightContentRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.5,
-        onComplete: () => gsap.set(rightContentRef.current, { willChange: "auto" })
-      }, 0.3);
-      
-      // Animate cards
-      tl.to(".stat-card-wrapper", { 
-        scale: 1, 
-        opacity: 1, 
-        duration: 0.4, 
-        stagger: 0.08,
-        ease: "back.out(1.4)",
-        onComplete: () => gsap.set(".stat-card-wrapper", { willChange: "auto" })
-      }, 0.5);
-    }, sectionRef);
+      observer.observe(section);
 
-    return () => ctx.revert();
+      return () => {
+        observer.disconnect();
+      };
+    } catch (error) {
+      console.error('About animation error:', error);
+    }
   }, []);
 
   return (
@@ -105,9 +118,7 @@ export default function About() {
         {/* EDITORIAL SECTION ANCHOR WITH SPLIT ANIMATION */}
         <div className="w-full mb-16 md:mb-24 text-center overflow-hidden">
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight">
-            <span ref={aboutTextRef} className="inline-block transition-colors duration-300 hover:!text-orange-600">About</span>
-            <span className="inline-block w-4"></span>
-            <span ref={meTextRef} className="inline-block transition-colors duration-300 hover:!text-orange-600">Me.</span>
+            <TextReveal text="About Me." className="justify-center" />
           </h2>
         </div>
 
