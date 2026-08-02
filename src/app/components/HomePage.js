@@ -1,94 +1,68 @@
 ﻿"use client";
-import { useEffect, useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef } from "react";
 import { Github, Linkedin, ExternalLink, Download, Mail } from "lucide-react";
+import { motion } from "framer-motion";
 import ModelView from "./ModelView";
+import DecryptedText from "./DecryptedText";
+import RotatingText from "./RotatingText";
 
 export default function HomePage({ startAnimation }) {
-  const [index, setIndex] = useState(0);
-  const [article, setArticle] = useState("a");
-  const prevArticleRef = useRef("a");
-
-  const skills = [
-    { title: "Frontend Developer", article: "a", desc: "Crafting responsive and accessible interfaces.", icon: "🎨" },
-    { title: "Frontend QA Engineer", article: "a", desc: "Ensuring pixel-perfect and bug-free experiences.", icon: "🧪" },
-    { title: "UI/UX Designer", article: "a", desc: "Focusing on user-centric design and interactions.", icon: "🖋️" },
-    { title: "Systems Engineer", article: "a", desc: "Optimizing low-level system performance.", icon: "⚙️" },
-    { title: "Machine Learning Engineer", article: "an", desc: "Developing scalable AI and ML pipelines.", icon: "🤖" },
-    { title: "Network App Developer", article: "a", desc: "Building robust high-performance network protocols.", icon: "🌐" },
-    { title: "Distributed Systems Eng", article: "a", desc: "Architecting resilient and scalable clusters.", icon: "☁️" },
-    { title: "Full-stack Developer", article: "a", desc: "Building end-to-end web applications.", icon: "💻" },
-    { title: "Blockchain Enthusiast", article: "a", desc: "Exploring decentralized cryptographic systems.", icon: "⛓️" },
-    { title: "AI Engineer", article: "an", desc: "Designing intelligent autonomous agents.", icon: "🧠" },
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => {
-        const nextIndex = (prev + 1) % skills.length;
-        const nextArticle = skills[nextIndex].article;
-        if (nextArticle !== prevArticleRef.current) {
-          setArticle(nextArticle);
-          prevArticleRef.current = nextArticle;
-        }
-        return nextIndex;
-      });
-    }, 3000);
-    return () => clearInterval(timer);
-  }, []);
-
+  const containerRef = useRef(null);
+  
   return (
     <section className="relative w-full min-h-screen flex items-center bg-orange-600/[0.03] overflow-hidden">
       {/* Container forced to flex row on large screens to keep ModelView on the right */}
       <div className="w-full max-w-[1600px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-8 px-6 sm:px-12 py-10 z-10">
         
         {/* Content Column */}
-        <div className="flex-1 flex flex-col items-start font-jetbrains-mono w-full xl:max-w-xl">
-          <h1 className="text-4xl sm:text-6xl font-bold mb-8 leading-tight">
-            Hi, I&apos;m <AnimatePresence mode="wait">
-              <motion.span 
-                key={article}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-orange-600 lowercase"
-              >
-                {article}
-              </motion.span>
-            </AnimatePresence>
-          </h1>
-
-          <div className="w-full bg-[#FFF9F5] border border-orange-200/50 rounded-2xl shadow-xl overflow-hidden mb-6">
-            <div className="px-4 py-3 border-b border-orange-200/30 flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                <div className="w-3 h-3 rounded-full bg-green-400" />
-              </div>
-              <div className="ml-2 text-[10px] uppercase font-bold text-orange-800/40 tracking-wider">Srikar_Expertise_Feed.app</div>
-            </div>
-
-            <div className="relative h-[130px] px-6 overflow-hidden">
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={index}
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -50, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 250, damping: 25 }}
-                  className="absolute inset-x-6 py-6 flex gap-4 items-center"
-                >
-                  <div className="w-12 h-12 flex-shrink-0 rounded-2xl bg-white border border-orange-100 flex items-center justify-center text-xl shadow-sm">
-                    {skills[index].icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-lg">{skills[index].title}</h3>
-                    <p className="text-sm text-slate-600 leading-tight mt-0.5">{skills[index].desc}</p>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+        <div ref={containerRef} className="flex-1 flex flex-col items-start font-jetbrains-mono w-full xl:max-w-xl">
+          <div className="mb-8 w-full">
+            {/* "Welcome to my" and "PORTFOLIO" */}
+            <h1 className="font-bold text-black uppercase leading-tight">
+              <DecryptedText
+                text="WELCOME TO MY"
+                speed={80}
+                maxIterations={20}
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                className="text-3xl sm:text-4xl md:text-5xl"
+                encryptedClassName="text-gray-400"
+              />
+              <br />
+              <DecryptedText
+                text="PORTFOLIO"
+                speed={80}
+                maxIterations={20}
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                className="text-orange-600 text-5xl sm:text-6xl md:text-7xl"
+                encryptedClassName="text-orange-300"
+              />
+            </h1>
+          </div>
+          
+          <div className="mb-8 flex items-center gap-3 flex-wrap">
+            <span className="text-2xl sm:text-3xl font-semibold text-black">I&apos;m</span>
+            <RotatingText
+              texts={[
+                'Frontend Developer',
+                'UI/UX Designer', 
+                'Full-stack Developer',
+                'ML Engineer',
+                'Systems Engineer'
+              ]}
+              mainClassName="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-xl sm:text-2xl"
+              staggerFrom="first"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "-100%", opacity: 0 }}
+              staggerDuration={0.015}
+              splitLevelClassName="overflow-hidden"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              rotationInterval={3000}
+            />
           </div>
 
           <p className="text-gray-700 text-sm max-w-xl mb-8 leading-relaxed">

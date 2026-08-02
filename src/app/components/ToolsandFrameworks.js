@@ -84,10 +84,10 @@ export default function ToolsandFrameworks() {
               {data.title}
             </div>
 
-            <div className="flex-1 flex flex-wrap gap-4 border-l border-black/5 pl-10">
+            <div className="flex-1 flex flex-wrap gap-2 border-l border-black/5 pl-10">
               {data.skills.map((skill) => (
-                <div key={skill.name} className="group relative px-5 py-3 rounded-2xl border border-black/5 hover:border-orange-600 bg-slate-50 transition-all flex items-center gap-3">
-                  <img src={skill.logo} alt={skill.name} className="w-6 h-6 object-contain" />
+                <div key={skill.name} className="group relative px-4 py-2.5 rounded-xl border border-black/5 hover:border-orange-600 bg-slate-50 transition-all flex items-center gap-2.5">
+                  <img src={skill.logo} alt={skill.name} className="w-5 h-5 object-contain" />
                   <span className="font-semibold text-slate-700 text-sm">{skill.name}</span>
                 </div>
               ))}
